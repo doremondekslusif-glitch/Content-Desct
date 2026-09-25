@@ -1,4 +1,4 @@
-const state={platform:"Instagram",goal:"Jangkauan",files:[]};
+const state={platform:"Instagram",goal:"Jangkauan",focus:"Hook audiens",files:[]};
 const platformNotes={Instagram:"Sesuaikan rekomendasi dengan karakter Instagram.",TikTok:"Fokus pada hook cepat, retention, dan discovery.",Facebook:"Cocokkan dengan percakapan dan engagement komunitas.",YouTube:"Perkuat judul, hook, dan alasan untuk menonton.",Threads:"Utamakan percakapan dan gaya yang natural.",X:"Buat pembuka singkat yang memancing respons."};
 const data={
 Instagram:{hook:"Ternyata hal kecil ini bisa bikin rutinitas sehari-hari jadi jauh lebih praktis 👀",caption:"Hal kecil yang ternyata kepakai setiap hari ✨\n\nKalau kamu suka sesuatu yang simpel, praktis, dan tetap enak dilihat, ini bisa jadi salah satu yang wajib masuk daily essentials kamu.\n\nMenurut kamu, bagian paling menarik dari konten ini apa?",hashtags:"#InstagramIndonesia #ContentCreator #LifestyleIndonesia #DailyEssentials #Rekomendasi #ExploreIndonesia",cta:"Kalau kamu suka konten seperti ini, simpan dulu dan kasih tahu pendapatmu di komentar.",tips:["Buat 1–2 detik pertama langsung menampilkan objek atau hasil utama.","Tambahkan teks pendek di video agar pesan tetap terbaca tanpa suara.","Akhiri dengan pertanyaan sederhana untuk mendorong komentar."]},
@@ -8,7 +8,11 @@ YouTube:{hook:"Kenapa saya baru menemukan ini sekarang?",caption:"Di video ini k
 Threads:{hook:"Ada nggak sih barang kecil yang akhirnya jadi barang wajib?",caption:"Awalnya kupikir biasa saja. Ternyata setelah dipakai beberapa kali, malah jadi salah satu barang yang paling sering dicari. 😅\n\nAda barang seperti itu juga di kamu?",hashtags:"#ThreadsIndonesia #DailyLife #Lifestyle #Cerita",cta:"Ceritakan versi kamu di reply.",tips:["Pertahankan bahasa natural dan personal.","Gunakan pertanyaan terbuka untuk memulai percakapan.","Hindari terlalu banyak hashtag agar terasa organik."]},
 X:{hook:"Barang sederhana, tapi ternyata kepakai setiap hari.",caption:"Suka menemukan barang yang awalnya terlihat biasa, tapi setelah dipakai malah jadi daily essential?\n\nIni salah satunya.",hashtags:"#Lifestyle #Rekomendasi #DailyEssentials",cta:"Setuju atau tidak?",tips:["Buat kalimat pertama sepadat mungkin.","Sisakan ruang untuk orang membalas atau quote-post.","Gunakan media sebagai pelengkap pesan, bukan pengganti konteks."]}};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-$$(".platform").forEach(btn=>btn.addEventListener("click",()=>{state.platform=btn.dataset.platform;$$(".platform").forEach(x=>x.classList.toggle("selected",x===btn));$("#platformNote").textContent=platformNotes[state.platform]}));
+$(".platform").forEach(btn=>btn.addEventListener("click",()=>{state.platform=btn.dataset.platform;$(".platform").forEach(x=>x.classList.toggle("selected",x===btn));$("#platformNote").textContent=platformNotes[state.platform]}));
+$(".focus").forEach(btn=>btn.addEventListener("click",()=>{state.focus=btn.dataset.focus;$(".focus").forEach(x=>x.classList.toggle("selected",x===btn))}));
+function showStep(step){$(".step").forEach(x=>x.classList.toggle("active",x.dataset.step===String(step)));$("#platformPanel").hidden=step!==1;$("#contentPanel").hidden=step!==2;$("#results").hidden=step!==3;if(step===2)$("#contentPanel").scrollIntoView({behavior:"smooth",block:"start"});if(step===3)$("#results").scrollIntoView({behavior:"smooth",block:"start"})}
+$("#nextToContent").addEventListener("click",()=>showStep(2));
+$("#backToPlatform").addEventListener("click",()=>showStep(1));
 $$(".goal").forEach(btn=>btn.addEventListener("click",()=>{state.goal=btn.dataset.goal;$$(".goal").forEach(x=>x.classList.toggle("selected",x===btn))}));
 $("#mediaInput").addEventListener("change",e=>addFiles([...e.target.files]));
 function addFiles(files){state.files=[...state.files,...files].slice(0,5);renderPreviews()}
@@ -96,7 +100,7 @@ function setGenerating(isGenerating){
 }
 
 function renderAiResult(result){
-  const d=data[state.platform],ctx=$("#context").value.trim(),m=getMediaProfile();
+  const d=data[state.platform],ctx=state.focus,m=getMediaProfile();
   $("#mediaSummary").textContent=m.label;
   $("#mediaInsight").textContent="AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
   $("#mediaAnalysis").textContent=result.media_analysis||m.analysis;
@@ -112,12 +116,11 @@ function renderAiResult(result){
   $("#score").textContent=safeScore.toFixed(1);
   $("#scoreBar").style.width=(safeScore*10)+"%";
   $("#scoreText").textContent=(result.score_reason||goalText[state.goal])+" Hasil ini dibuat dari analisis media yang diunggah.";
-  $("#results").hidden=false;
-  $("#results").scrollIntoView({behavior:"smooth",block:"start"});
+  showStep(3);
 }
 
 async function generate(){
-  const d=data[state.platform],ctx=$("#context").value.trim(),m=getMediaProfile();
+  const d=data[state.platform],ctx=state.focus,m=getMediaProfile();
   if(!state.files.length){
     $("#mediaSummary").textContent=m.label;
     $("#mediaInsight").textContent=m.insight;
@@ -129,7 +132,7 @@ async function generate(){
     $("#tips").innerHTML=d.tips.map(x=>"<li>"+x+"</li>").join("");
     $("#score").textContent="8.2"; $("#scoreBar").style.width="82%";
     $("#scoreText").textContent=goalText[state.goal]+" Upload foto atau video untuk analisis AI yang sebenarnya.";
-    $("#results").hidden=false; $("#results").scrollIntoView({behavior:"smooth",block:"start"}); return;
+    $("#results").hidden=false; showStep(3); return;
   }
   setGenerating(true);
   try{
@@ -153,7 +156,7 @@ async function generate(){
     $("#results").hidden=false;
   }finally{setGenerating(false)}
 }
-$("#generateBtn").addEventListener("click",generate);$("#regenerateBtn").addEventListener("click",generate);
+$("#generateBtn").addEventListener("click",generate);$("#regenerateBtn").addEventListener("click",generate);$("#backToContent").addEventListener("click",()=>showStep(2));
 $$(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{const text=$("#"+btn.dataset.copy).textContent;await navigator.clipboard.writeText(text);showToast("Berhasil disalin ✓")}));
 function showToast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1600)}
 const zone=$("#uploadZone");["dragenter","dragover"].forEach(e=>zone.addEventListener(e,x=>{x.preventDefault();zone.style.borderColor="#9b7cff"}));["dragleave","drop"].forEach(e=>zone.addEventListener(e,x=>{x.preventDefault();zone.style.borderColor=""}));zone.addEventListener("drop",e=>addFiles([...e.dataTransfer.files].filter(f=>f.type.startsWith("image/")||f.type.startsWith("video/"))));

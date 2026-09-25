@@ -24,7 +24,7 @@ function getMediaProfile(){
 }
 const ANALYZER_API_URL=window.CONTENT_DESCT_API_URL||localStorage.getItem("contentDesctApiUrl")||"https://content-desct-o0ccrwc5q-doremondekslusif-5881.vercel.app/api/analyze";
 
-async function fileToDataUrl(file,maxSide=1280,quality=.82){
+async function fileToDataUrl(file,maxSide=720,quality=.62){
   if(file.type.startsWith("image/")){
     return new Promise((resolve,reject)=>{
       const img=new Image();
@@ -59,12 +59,12 @@ async function videoToFrames(file,count=4){
         for(const time of times){
           video.currentTime=Math.min(time,Math.max(0,duration-.05));
           await new Promise(res=>{video.onseeked=res});
-          const maxSide=960,scale=Math.min(1,maxSide/Math.max(video.videoWidth||1,video.videoHeight||1));
+          const maxSide=640,scale=Math.min(1,maxSide/Math.max(video.videoWidth||1,video.videoHeight||1));
           const canvas=document.createElement("canvas");
           canvas.width=Math.max(1,Math.round((video.videoWidth||640)*scale));
           canvas.height=Math.max(1,Math.round((video.videoHeight||360)*scale));
           canvas.getContext("2d").drawImage(video,0,0,canvas.width,canvas.height);
-          frames.push(canvas.toDataURL("image/jpeg",.76));
+          frames.push(canvas.toDataURL("image/jpeg",.55));
         }
         URL.revokeObjectURL(url);
         resolve(frames);
@@ -82,7 +82,7 @@ async function buildMediaPayload(){
       const data=await fileToDataUrl(file);
       if(data)media.push({type:"image",name:file.name,data});
     }else if(file.type.startsWith("video/")){
-      const frames=await videoToFrames(file,4);
+      const frames=await videoToFrames(file,2);
       frames.forEach((data,index)=>media.push({type:"video_frame",name:file.name+" · frame "+(index+1),data}));
     }
   }
@@ -134,10 +134,12 @@ async function generate(){
   setGenerating(true);
   try{
     const media=await buildMediaPayload();
+    const requestBody=JSON.stringify({platform:state.platform,goal:state.goal,context:ctx,media});
+    if(new Blob([requestBody]).size>4*1024*1024)throw new Error("Media terlalu besar untuk dikirim ke backend. Kurangi jumlah foto/video atau gunakan file yang lebih kecil.");
     const response=await fetch(ANALYZER_API_URL,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({platform:state.platform,goal:state.goal,context:ctx,media})
+      body:requestBody
     });
     const raw=await response.text();
     let result={};
@@ -147,7 +149,7 @@ async function generate(){
   }catch(error){
     console.error(error);
     showToast(error.message||"Analisis AI gagal.");
-    $("#mediaInsight").textContent="Analisis AI belum terhubung. Pastikan backend sudah dideploy dan URL API benar.";
+    $("#mediaInsight").textContent="Analisis AI gagal: "+(error.message||"periksa koneksi backend dan URL API.");
     $("#results").hidden=false;
   }finally{setGenerating(false)}
 }

@@ -138,7 +138,7 @@ async function generate(){
     if(new Blob([requestBody]).size>4*1024*1024)throw new Error("Media terlalu besar untuk dikirim ke backend. Kurangi jumlah foto/video atau gunakan file yang lebih kecil.");
     const response=await fetch(ANALYZER_API_URL,{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{"Content-Type":"text/plain;charset=UTF-8"},
       body:requestBody
     });
     const raw=await response.text();

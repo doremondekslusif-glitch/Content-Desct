@@ -1,3 +1,4 @@
+// Vercel sync
 const ALLOWED_ORIGIN=process.env.ALLOWED_ORIGIN||"*";
 const MODEL=process.env.GEMINI_MODEL||"gemini-3-flash-preview";
 

@@ -1,4 +1,7 @@
 {
+  "git": {
+    "deploymentEnabled": true
+  },
   "functions": {
     "api/analyze.js": {
       "maxDuration": 60

@@ -22,7 +22,7 @@ function getMediaProfile(){
   if(images)return {label:`${images} foto`,insight:"Mode foto aktif. Rekomendasi difokuskan pada visual, komposisi, detail objek, dan teks yang cocok ditempatkan pada gambar.",analysis:"Mode foto terdeteksi. Gunakan visual utama sebagai fokus pesan, lalu sesuaikan caption dengan objek, suasana, dan tujuan posting.",visual:"Coba teks pendek 3–7 kata yang langsung menyampaikan manfaat utama."};
   return {label:`${videos} video`,insight:"Mode video aktif. Rekomendasi difokuskan pada hook awal, retention, teks layar, dan CTA.",analysis:"Mode video terdeteksi. Prioritaskan frame pembuka yang kuat, pesan utama yang cepat dipahami, dan payoff sebelum penonton kehilangan perhatian.",visual:"Tambahkan hook 1 kalimat pada 1–2 detik pertama."};
 }
-const ANALYZER_API_URL=window.CONTENT_DESCT_API_URL||localStorage.getItem("contentDesctApiUrl")||"https://content-desct-o0ccrwc5q-doremondekslusif-5881.vercel.app/api/analyze";
+const ANALYZER_API_URL=window.CONTENT_DESCT_API_URL||localStorage.getItem("contentDesctApiUrl")||"https://content-desct-tsaau03zq-doremondekslusif-5881.vercel.app/api/analyze";
 
 async function fileToDataUrl(file,maxSide=720,quality=.62){
   if(file.type.startsWith("image/")){

@@ -22,7 +22,135 @@ function getMediaProfile(){
   if(images)return {label:`${images} foto`,insight:"Mode foto aktif. Rekomendasi difokuskan pada visual, komposisi, detail objek, dan teks yang cocok ditempatkan pada gambar.",analysis:"Mode foto terdeteksi. Gunakan visual utama sebagai fokus pesan, lalu sesuaikan caption dengan objek, suasana, dan tujuan posting.",visual:"Coba teks pendek 3–7 kata yang langsung menyampaikan manfaat utama."};
   return {label:`${videos} video`,insight:"Mode video aktif. Rekomendasi difokuskan pada hook awal, retention, teks layar, dan CTA.",analysis:"Mode video terdeteksi. Prioritaskan frame pembuka yang kuat, pesan utama yang cepat dipahami, dan payoff sebelum penonton kehilangan perhatian.",visual:"Tambahkan hook 1 kalimat pada 1–2 detik pertama."};
 }
-function generate(){const d=data[state.platform],ctx=$("#context").value.trim(),m=getMediaProfile();$("#mediaSummary").textContent=m.label;$("#mediaInsight").textContent=m.insight;$("#mediaAnalysis").textContent=m.analysis;$("#visualText").textContent=m.visual;$("#hook").textContent=d.hook;$("#caption").textContent=ctx?d.caption+"\n\nKonteks tambahan: "+ctx:d.caption;$("#hashtags").textContent=d.hashtags;$("#cta").textContent=d.cta;$("#tips").innerHTML=d.tips.map(x=>"<li>"+x+"</li>").join("");const score=state.files.length?8.9:8.2;$("#score").textContent=score.toFixed(1);$("#scoreBar").style.width=(score*10)+"%";$("#scoreText").textContent=goalText[state.goal]+" Hasil ini merupakan rekomendasi awal dan dapat disempurnakan setelah integrasi AI.";$("#results").hidden=false;$("#results").scrollIntoView({behavior:"smooth",block:"start"})}
+const ANALYZER_API_URL=window.CONTENT_DESCT_API_URL||localStorage.getItem("contentDesctApiUrl")||"/api/analyze";
+
+async function fileToDataUrl(file,maxSide=1280,quality=.82){
+  if(file.type.startsWith("image/")){
+    return new Promise((resolve,reject)=>{
+      const img=new Image();
+      img.onload=()=>{
+        const scale=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+        canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+        canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL("image/jpeg",quality));
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror=reject;
+      img.src=URL.createObjectURL(file);
+    });
+  }
+  return null;
+}
+
+async function videoToFrames(file,count=4){
+  return new Promise((resolve,reject)=>{
+    const video=document.createElement("video");
+    const url=URL.createObjectURL(file);
+    video.preload="metadata";
+    video.muted=true;
+    video.playsInline=true;
+    video.onloadedmetadata=async()=>{
+      try{
+        const duration=Number.isFinite(video.duration)?video.duration:0;
+        const times=duration>0?Array.from({length:count},(_,i)=>duration*(i+.5)/count):[0];
+        const frames=[];
+        for(const time of times){
+          video.currentTime=Math.min(time,Math.max(0,duration-.05));
+          await new Promise(res=>{video.onseeked=res});
+          const maxSide=960,scale=Math.min(1,maxSide/Math.max(video.videoWidth||1,video.videoHeight||1));
+          const canvas=document.createElement("canvas");
+          canvas.width=Math.max(1,Math.round((video.videoWidth||640)*scale));
+          canvas.height=Math.max(1,Math.round((video.videoHeight||360)*scale));
+          canvas.getContext("2d").drawImage(video,0,0,canvas.width,canvas.height);
+          frames.push(canvas.toDataURL("image/jpeg",.76));
+        }
+        URL.revokeObjectURL(url);
+        resolve(frames);
+      }catch(err){URL.revokeObjectURL(url);reject(err)}
+    };
+    video.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Video tidak dapat dibaca browser."))};
+    video.src=url;
+  });
+}
+
+async function buildMediaPayload(){
+  const media=[];
+  for(const file of state.files){
+    if(file.type.startsWith("image/")){
+      const data=await fileToDataUrl(file);
+      if(data)media.push({type:"image",name:file.name,data});
+    }else if(file.type.startsWith("video/")){
+      const frames=await videoToFrames(file,4);
+      frames.forEach((data,index)=>media.push({type:"video_frame",name:file.name+" · frame "+(index+1),data}));
+    }
+  }
+  return media;
+}
+
+function setGenerating(isGenerating){
+  const btn=$("#generateBtn");
+  btn.disabled=isGenerating;
+  btn.innerHTML=isGenerating?"<span>◌</span> AI sedang menganalisis media...":"<span>✦</span> Analisis & Generate";
+}
+
+function renderAiResult(result){
+  const d=data[state.platform],ctx=$("#context").value.trim(),m=getMediaProfile();
+  $("#mediaSummary").textContent=m.label;
+  $("#mediaInsight").textContent="AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
+  $("#mediaAnalysis").textContent=result.media_analysis||m.analysis;
+  $("#visualText").textContent=result.visual_text||m.visual;
+  $("#hook").textContent=result.hook||d.hook;
+  $("#caption").textContent=ctx&&result.caption?result.caption+"\n\nKonteks tambahan: "+ctx:(result.caption||d.caption);
+  $("#hashtags").textContent=result.hashtags||d.hashtags;
+  $("#cta").textContent=result.cta||d.cta;
+  const tips=Array.isArray(result.tips)?result.tips:d.tips;
+  $("#tips").innerHTML=tips.map(x=>"<li>"+x+"</li>").join("");
+  const score=Number(result.score);
+  const safeScore=Number.isFinite(score)?Math.max(0,Math.min(10,score)):(state.files.length?8.9:8.2);
+  $("#score").textContent=safeScore.toFixed(1);
+  $("#scoreBar").style.width=(safeScore*10)+"%";
+  $("#scoreText").textContent=(result.score_reason||goalText[state.goal])+" Hasil ini dibuat dari analisis media yang diunggah.";
+  $("#results").hidden=false;
+  $("#results").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+async function generate(){
+  const d=data[state.platform],ctx=$("#context").value.trim(),m=getMediaProfile();
+  if(!state.files.length){
+    $("#mediaSummary").textContent=m.label;
+    $("#mediaInsight").textContent=m.insight;
+    $("#mediaAnalysis").textContent=m.analysis;
+    $("#visualText").textContent=m.visual;
+    $("#hook").textContent=d.hook;
+    $("#caption").textContent=ctx?d.caption+"\n\nKonteks tambahan: "+ctx:d.caption;
+    $("#hashtags").textContent=d.hashtags; $("#cta").textContent=d.cta;
+    $("#tips").innerHTML=d.tips.map(x=>"<li>"+x+"</li>").join("");
+    $("#score").textContent="8.2"; $("#scoreBar").style.width="82%";
+    $("#scoreText").textContent=goalText[state.goal]+" Upload foto atau video untuk analisis AI yang sebenarnya.";
+    $("#results").hidden=false; $("#results").scrollIntoView({behavior:"smooth",block:"start"}); return;
+  }
+  setGenerating(true);
+  try{
+    const media=await buildMediaPayload();
+    const response=await fetch(ANALYZER_API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({platform:state.platform,goal:state.goal,context:ctx,media})
+    });
+    const raw=await response.text();
+    let result={};
+    try{result=JSON.parse(raw)}catch{}
+    if(!response.ok)throw new Error(result.error||"Server AI mengembalikan error.");
+    renderAiResult(result);
+  }catch(error){
+    console.error(error);
+    showToast(error.message||"Analisis AI gagal.");
+    $("#mediaInsight").textContent="Analisis AI belum terhubung. Pastikan backend sudah dideploy dan URL API benar.";
+    $("#results").hidden=false;
+  }finally{setGenerating(false)}
+}
 $("#generateBtn").addEventListener("click",generate);$("#regenerateBtn").addEventListener("click",generate);
 $$(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{const text=$("#"+btn.dataset.copy).textContent;await navigator.clipboard.writeText(text);showToast("Berhasil disalin ✓")}));
 function showToast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1600)}

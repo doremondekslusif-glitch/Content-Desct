@@ -26,7 +26,11 @@ export default async function handler(req,res){
   }
 
   try{
-    const {platform="Instagram",goal="Jangkauan",context="",media=[]}=req.body||{};
+    let body=req.body||{};
+    if(typeof body==="string"){
+      try{body=JSON.parse(body)}catch{body={}}
+    }
+    const {platform="Instagram",goal="Jangkauan",context="",media=[]}=body;
 
     if(!Array.isArray(media)||!media.length){
       return res.status(400).json({error:"Tidak ada media untuk dianalisis."});

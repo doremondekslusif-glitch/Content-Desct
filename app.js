@@ -157,3 +157,4 @@ $("#generateBtn").addEventListener("click",generate);$("#regenerateBtn").addEven
 $$(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{const text=$("#"+btn.dataset.copy).textContent;await navigator.clipboard.writeText(text);showToast("Berhasil disalin ✓")}));
 function showToast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1600)}
 const zone=$("#uploadZone");["dragenter","dragover"].forEach(e=>zone.addEventListener(e,x=>{x.preventDefault();zone.style.borderColor="#9b7cff"}));["dragleave","drop"].forEach(e=>zone.addEventListener(e,x=>{x.preventDefault();zone.style.borderColor=""}));zone.addEventListener("drop",e=>addFiles([...e.dataTransfer.files].filter(f=>f.type.startsWith("image/")||f.type.startsWith("video/"))));
+// Vercel auto-deploy test

@@ -325,7 +325,7 @@ async function copyText(text){
     showToast("Berhasil disalin ✓");
   }catch(error){showToast("Gagal menyalin, coba lagi.")}
 }
-$(".copy-btn") && $(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{
+$(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{
   const text=$( "#"+btn.dataset.copy)?.innerText||"";
   if(!text.trim())return showToast("Belum ada teks untuk disalin.");
   const original=btn.textContent;

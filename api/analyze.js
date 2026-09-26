@@ -41,7 +41,7 @@ const RESPONSE_SCHEMA={
     content_ideas:{type:"array",items:{type:"string"}},
     tips:{type:"array",items:{type:"string"}}
   },
-  required:["score","score_reason","score_breakdown","media_analysis","visual_summary","visual_strengths","visual_weaknesses","audience_fit","platform_strategy","platform_tips","style_variations","content_mode","hook","hook_usage","hook_options","video_hook","voiceover","video_structure","on_screen_text","photo_strategy","caption","hashtags","cta","visual_text","content_ideas","tips"]
+  required:["score","score_reason","score_breakdown","media_analysis","visual_summary","visual_details","visual_strengths","visual_weaknesses","audience_fit","platform_strategy","platform_tips","style_variations","content_mode","hook","hook_usage","hook_options","video_hook","voiceover","video_structure","on_screen_text","photo_strategy","caption","hashtags","cta","visual_text","content_ideas","tips"]
 };
 
 function cors(res){

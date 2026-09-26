@@ -1,4 +1,5 @@
-const state={platform:"Instagram",goal:"Jangkauan",focus:"Hook audiens",audience:"Umum",tone:"Natural & santai",files:[],selectedHook:""};
+const state={platform:"Instagram",goal:"Jangkauan",focus:"Hook audiens",audience:"Umum",tone:"Natural & santai",files:[],selectedHook:"",previewUrls:[]};
+let isGenerating=false;
 
 const platformNotes={
   Instagram:"Sesuaikan rekomendasi dengan karakter Instagram.",
@@ -77,17 +78,21 @@ function addFiles(files){
 }
 function renderPreviews(){
   const list=$("#previewList");if(!list)return;
+  state.previewUrls.forEach(url=>URL.revokeObjectURL(url));
+  state.previewUrls=[];
   list.innerHTML="";
   state.files.forEach((file,i)=>{
     const wrap=document.createElement("div");wrap.className="preview";
     const url=URL.createObjectURL(file);
+    state.previewUrls.push(url);
     if(file.type.startsWith("video/")){
-      const v=document.createElement("video");v.src=url;v.muted=true;v.playsInline=true;v.controls=true;wrap.appendChild(v);
+      const v=document.createElement("video");v.src=url;v.muted=true;v.playsInline=true;v.controls=true;v.preload="metadata";wrap.appendChild(v);
     }else{
       const img=document.createElement("img");img.src=url;img.alt=file.name||"Preview";wrap.appendChild(img);
     }
-    const b=document.createElement("button");b.type="button";b.className="remove";b.textContent="×";
-    b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();state.files.splice(i,1);URL.revokeObjectURL(url);renderPreviews()});
+    const b=document.createElement("button");b.type="button";b.className="remove";b.setAttribute("aria-label","Hapus "+(file.name||"media"));
+    b.textContent="×";
+    b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();state.files.splice(i,1);renderPreviews()});
     wrap.appendChild(b);list.appendChild(wrap);
   });
 }
@@ -181,9 +186,17 @@ async function buildMediaPayload(){
 }
 
 function setGenerating(value){
-  const btn=$("#generateBtn");if(!btn)return;
-  btn.disabled=value;
-  btn.innerHTML=value?"<span>◌</span> AI sedang menganalisis media...":"<span>✦</span> Analisis & Generate";
+  isGenerating=value;
+  const generateBtn=$("#generateBtn");
+  const regenerateBtn=$("#regenerateBtn");
+  if(generateBtn){
+    generateBtn.disabled=value;
+    generateBtn.innerHTML=value?"<span>◌</span> AI sedang menganalisis media...":"<span>✦</span> Analisis & Generate";
+  }
+  if(regenerateBtn){
+    regenerateBtn.disabled=value;
+    regenerateBtn.innerHTML=value?"<span>◌</span> Menganalisis...":"↻ Generate ulang";
+  }
 }
 
 function escapeHtml(text){
@@ -246,6 +259,7 @@ function renderAiResult(result){
 }
 
 async function generate(){
+  if(isGenerating)return;
   const d=data[state.platform]||data.Instagram,m=getMediaProfile();
   setGenerating(true);
   try{
@@ -297,7 +311,15 @@ async function copyText(text){
     showToast("Berhasil disalin ✓");
   }catch(error){showToast("Gagal menyalin, coba lagi.")}
 }
-$$(".copy-btn").forEach(btn=>btn.addEventListener("click",()=>copyText($( "#"+btn.dataset.copy)?.innerText||"")));
+$(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{
+  const text=$( "#"+btn.dataset.copy)?.innerText||"";
+  if(!text.trim())return showToast("Belum ada teks untuk disalin.");
+  const original=btn.textContent;
+  await copyText(text);
+  btn.textContent="Tersalin ✓";
+  clearTimeout(btn._copyTimer);
+  btn._copyTimer=setTimeout(()=>{btn.textContent=original},1400);
+}));
 $("#copyAllBtn")?.addEventListener("click",()=>{
   const sections=[
     ["Pilihan Hook",$("#hookOptions")?.innerText],["Analisis media",$("#mediaAnalysis")?.innerText],["Hook",$("#hook")?.innerText],
@@ -313,3 +335,5 @@ $("#backToContent")?.addEventListener("click",()=>showStep(2));
 
 showStep(1);
 
+
+window.addEventListener("beforeunload",()=>{state.previewUrls.forEach(url=>URL.revokeObjectURL(url));state.previewUrls=[]});

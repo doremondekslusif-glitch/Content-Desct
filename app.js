@@ -249,6 +249,23 @@ function renderAiResult(result){
   if(weaknesses.length)analysisParts.push("<section><h4>Yang bisa diperbaiki</h4><ul>"+weaknesses.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
   const analysis=$("#mediaAnalysis");if(analysis)analysis.innerHTML=analysisParts.join("")||"<p>"+escapeHtml(m.analysis)+"</p>";
   const visualText=$("#visualText");if(visualText)visualText.textContent=result.visual_text||m.visual;
+  const videoCard=$("#videoStrategyCard"),photoCard=$("#photoStrategyCard");
+  if(videoCard)videoCard.hidden=mode==="FOTO";
+  if(photoCard)photoCard.hidden=mode==="VIDEO";
+  const videoHook=$("#videoHook"),voiceover=$("#voiceover"),photoStrategy=$("#photoStrategy");
+  if(videoHook)videoHook.textContent=result.video_hook||result.hook||"Gunakan kalimat paling menarik pada 1–3 detik pertama.";
+  if(voiceover)voiceover.textContent=result.voiceover||result.video_hook||"Narasi singkat yang menjelaskan apa yang sedang dilihat penonton.";
+  const onScreenText=$("#onScreenText");
+  if(onScreenText){
+    const screenItems=Array.isArray(result.on_screen_text)&&result.on_screen_text.length?result.on_screen_text:["Hook singkat","Manfaat utama","Bukti atau penggunaan","CTA"];
+    onScreenText.innerHTML=screenItems.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
+  }
+  const videoStructure=$("#videoStructure");
+  if(videoStructure){
+    const structure=Array.isArray(result.video_structure)&&result.video_structure.length?result.video_structure:["Opening: tampilkan bagian paling menarik.","Context: jelaskan inti konten dengan cepat.","Payoff: tunjukkan manfaat atau hasil yang terlihat.","Closing: arahkan penonton ke CTA."];
+    videoStructure.innerHTML=structure.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
+  }
+  if(photoStrategy)photoStrategy.textContent=result.photo_strategy||"Gunakan foto utama dengan subjek paling jelas, crop yang tidak terlalu padat, dan teks overlay singkat bila membantu pesan.";
   const hook=$("#hook");if(hook)hook.textContent=result.hook||d.hook;
   const hookCard=$("#hookCardTitle"),hookHelp=$("#hookHelp");
   if(hookCard)hookCard.textContent=mode==="VIDEO"?"🎬 Hook Video":mode==="CAMPURAN"?"🎬 Hook Utama":"🔥 Hook Caption";
@@ -313,7 +330,12 @@ async function generate(){
       cta:d.cta,
       visual_text:m.visual,
       content_ideas:["Tunjukkan manfaat utama dari konten ini.","Buat versi before-after.","Tampilkan cara penggunaan sehari-hari.","Jawab pertanyaan yang sering muncul dari audiens.","Buat versi video pendek dengan hook yang lebih cepat."],
-      tips:d.tips
+      tips:d.tips,
+      video_hook:d.hook,
+      voiceover:"",
+      video_structure:[],
+      on_screen_text:[],
+      photo_strategy:"Fokuskan foto pada subjek utama dan gunakan teks overlay singkat bila diperlukan."
     };
     renderAiResult(fallback);
     $("#mediaInsight").textContent="AI belum dapat dihubungi ("+(error.message||"server 503")+"). Hasil sementara tetap ditampilkan agar kontenmu tidak hilang.";

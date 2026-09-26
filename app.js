@@ -318,3 +318,20 @@ $("#regenerateBtn")?.addEventListener("click",generate);
 $("#backToContent")?.addEventListener("click",()=>showStep(2));
 
 showStep(1);
+
+// Fallback click handling untuk menjaga kontrol tetap aktif setelah hasil dirender.
+document.addEventListener("click",function(e){
+  const platform=e.target.closest(".platform");
+  if(platform){state.platform=platform.dataset.platform||state.platform;$$(".platform").forEach(x=>x.classList.toggle("selected",x===platform));const note=$("#platformNote");if(note)note.textContent=platformNotes[state.platform]||"";return}
+  const focus=e.target.closest(".focus");
+  if(focus){state.focus=focus.dataset.focus||state.focus;$$(".focus").forEach(x=>x.classList.toggle("selected",x===focus));return}
+  const goal=e.target.closest(".goal");
+  if(goal){state.goal=goal.dataset.goal||state.goal;$$(".goal").forEach(x=>x.classList.toggle("selected",x===goal));return}
+  const option=e.target.closest(".option");
+  if(option){const key=option.dataset.audience!==undefined?"audience":"tone";state[key]=option.dataset[key]||state[key];$$(".option").filter(x=>x.dataset[key]!==undefined).forEach(x=>x.classList.toggle("selected",x===option));return}
+  if(e.target.closest("#nextToContent")){showStep(2);return}
+  if(e.target.closest("#backToPlatform")){showStep(1);return}
+  if(e.target.closest("#backToContent")){showStep(2);return}
+  if(e.target.closest("#generateBtn")){generate();return}
+  if(e.target.closest("#regenerateBtn")){generate();return}
+});

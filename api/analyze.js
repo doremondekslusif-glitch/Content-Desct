@@ -139,10 +139,11 @@ export default async function handler(req,res){
     var context=body.context||"";
     var audience=body.audience||"Umum";
     var tone=body.tone||"Natural & santai";
+    var contentMode=body.contentMode||"FOTO";
     var media=body.media||[];
     if(!Array.isArray(media)||!media.length)return res.status(400).json({error:"Tidak ada media untuk dianalisis."});
     if(media.length>20)return res.status(400).json({error:"Jumlah frame/media terlalu banyak."});
-    var parts=buildParts({platform:platform,goal:goal,context:context,audience:audience,tone:tone,media:media});
+    var parts=buildParts({platform:platform,goal:goal,context:context,audience:audience,tone:tone,contentMode:contentMode,media:media});
     if(parts.length===1)return res.status(400).json({error:"Media gambar/frame tidak valid."});
     var lastError=null;
     for(var j=0;j<DEFAULT_MODELS.length;j++){

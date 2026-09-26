@@ -37,3 +37,5 @@ button:disabled{opacity:.6;cursor:wait;transform:none!important}
   html{scroll-behavior:auto}
   *,*:before,*:after{transition:none!important;animation:none!important}
 }
+
+.field-help{margin:-2px 0 10px;color:#8f96a3;font-size:13px;line-height:1.55}

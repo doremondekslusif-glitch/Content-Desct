@@ -22,8 +22,12 @@ const RESPONSE_SCHEMA={
     visual_weaknesses:{type:"array",items:{type:"string"}},
     audience_fit:{type:"string"},
     platform_strategy:{type:"string"},
+    content_mode:{type:"string"},
     hook:{type:"string"},
+    hook_usage:{type:"string"},
     hook_options:{type:"array",items:{type:"string"}},
+    video_hook:{type:"string"},
+    voiceover:{type:"string"},
     caption:{type:"string"},
     hashtags:{type:"string"},
     cta:{type:"string"},
@@ -31,7 +35,7 @@ const RESPONSE_SCHEMA={
     content_ideas:{type:"array",items:{type:"string"}},
     tips:{type:"array",items:{type:"string"}}
   },
-  required:["score","score_reason","score_breakdown","media_analysis","visual_summary","visual_strengths","visual_weaknesses","audience_fit","platform_strategy","hook","hook_options","caption","hashtags","cta","visual_text","content_ideas","tips"]
+  required:["score","score_reason","score_breakdown","media_analysis","visual_summary","visual_strengths","visual_weaknesses","audience_fit","platform_strategy","content_mode","hook","hook_usage","hook_options","video_hook","voiceover","caption","hashtags","cta","visual_text","content_ideas","tips"]
 };
 
 function cors(res){
@@ -57,18 +61,25 @@ function buildPrompt(o){
     "4. Temukan kekuatan dan kelemahan visual terhadap tujuan konten.\n"+
     "5. Sesuaikan strategi dengan platform, tujuan, fokus, audiens, dan gaya bahasa.\n"+
     "6. Buat copy yang spesifik terhadap media, bukan kalimat generik yang bisa dipakai untuk gambar apa pun.\n"+
-    "7. Lakukan pemeriksaan akhir agar semua output konsisten dengan bukti visual dan pilihan pengguna.\n\n"+
+    "7. Tentukan mode konten: FOTO jika semua media adalah foto; VIDEO jika ada video/frame video; CAMPURAN jika keduanya ada.\n"+
+    "8. Untuk FOTO: hook adalah kalimat pembuka caption. Caption boleh lebih informatif.\n"+
+    "9. Untuk VIDEO: hook utama dipakai pada 1–3 detik pertama sebagai voice-over atau teks layar. Caption harus singkat karena informasi utama disampaikan oleh video.\n"+
+    "10. Untuk VIDEO, isi video_hook dan voiceover dengan kalimat natural; boleh sama jika paling sesuai.\n"+
+    "11. Untuk CAMPURAN, prioritaskan strategi video bila ada video.\n"+
+    "12. Lakukan pemeriksaan akhir agar semua output konsisten dengan bukti visual dan pilihan pengguna.\n\n"+
     "KONTEKS:\n"+
     "Platform: "+o.platform+"\n"+
     "Tujuan: "+o.goal+"\n"+
     "Fokus: "+(o.context||"(tidak ada)")+"\n"+
     "Target audiens: "+o.audience+"\n"+
-    "Gaya bahasa: "+o.tone+"\n\n"+
+    "Gaya bahasa: "+o.tone+"\n"+
+    "Mode media: "+o.contentMode+"\n\n"+
     "ATURAN KUALITAS:\n"+
     "- Gunakan Bahasa Indonesia natural dan konkret.\n"+
     "- Jangan menjanjikan viral, trending, pasti laku, atau performa tertentu.\n"+
     "- Buat 3 hook dengan pendekatan berbeda: curiosity, benefit, dan relatable/story.\n"+
-    "- Caption harus sesuai platform dan tujuan, bukan sekadar mengulang hook.\n"+
+    "- Hook harus cocok dengan mode media: caption untuk foto; voice-over/teks awal untuk video.\n"+
+    "- Caption harus sesuai platform dan tujuan. Untuk video, buat caption ringkas dan tidak mengulang penjelasan panjang.\n"+
     "- Hashtag hanya yang relevan dengan isi media dan konteks.\n"+
     "- CTA harus sesuai tujuan; jangan selalu mengarah ke pembelian.\n"+
     "- Ide konten berikutnya harus berasal dari media yang dianalisis.\n"+

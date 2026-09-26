@@ -231,6 +231,12 @@ function renderAiResult(result){
   if(hookHelp)hookHelp.textContent=result.hook_usage||(mode==="VIDEO"?"Gunakan di voice-over atau teks pada 1–3 detik pertama video.":"Gunakan sebagai kalimat pertama caption.");
   const captionCard=$("#captionCardTitle");
   if(captionCard)captionCard.textContent=mode==="VIDEO"?"✍️ Caption singkat":"✍️ Caption";
+  const hookCard=$("#hookCardTitle");
+  const hookHelp=$("#hookHelp");
+  if(hookCard)hookCard.textContent=mode==="VIDEO"?"🎬 Hook Video":mode==="CAMPURAN"?"🎬 Hook Utama":"🔥 Hook Caption";
+  if(hookHelp)hookHelp.textContent=result.hook_usage||(mode==="VIDEO"?"Gunakan di voice-over atau teks pada 1–3 detik pertama video.":"Gunakan sebagai kalimat pertama caption.");
+  const captionCard=$("#captionCardTitle");
+  if(captionCard)captionCard.textContent=mode==="VIDEO"?"✍️ Caption singkat":"✍️ Caption";
   $("#caption").innerHTML=formatText(result.caption||d.caption);
   $("#hashtags").textContent=result.hashtags||d.hashtags;
   $("#cta").textContent=result.cta||d.cta;

@@ -156,7 +156,13 @@ async function videoToFrames(file,count=2){
         const frames=[];
         for(const time of times){
           video.currentTime=Math.min(time,Math.max(0,duration-.05));
-          await new Promise((res,rej)=>{video.onseeked=res;video.onerror=()=>rej(new Error("Gagal membaca frame video."))});
+          await new Promise((res,rej)=>{
+            let settled=false;
+            const finish=(fn)=>{if(settled)return;settled=true;clearTimeout(timer);video.onseeked=null;video.onerror=null;fn()};
+            const timer=setTimeout(()=>finish(()=>rej(new Error("Frame video terlalu lama dibaca."))),7000);
+            video.onseeked=()=>finish(res);
+            video.onerror=()=>finish(()=>rej(new Error("Gagal membaca frame video.")));
+          });
           const scale=Math.min(1,640/Math.max(video.videoWidth||1,video.videoHeight||1));
           const canvas=document.createElement("canvas");
           canvas.width=Math.max(1,Math.round((video.videoWidth||640)*scale));
@@ -278,12 +284,20 @@ async function generate(){
     const contentMode=state.files.some(f=>f.type.startsWith("video/"))?(state.files.some(f=>f.type.startsWith("image/"))?"CAMPURAN":"VIDEO"):"FOTO";
     const requestBody=JSON.stringify({platform:state.platform,goal:state.goal,context:state.focus,audience:state.audience,tone:state.tone,contentMode,media});
     if(new Blob([requestBody]).size>4*1024*1024)throw new Error("Media terlalu besar untuk dikirim. Kurangi jumlah atau ukuran file.");
-    const response=await fetch(ANALYZER_API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:requestBody});
+    const controller=new AbortController();
+    const requestTimer=setTimeout(()=>controller.abort(),55000);
+    let response;
+    try{
+      response=await fetch(ANALYZER_API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:requestBody,signal:controller.signal});
+    }finally{
+      clearTimeout(requestTimer);
+    }
     const raw=await response.text();let result={};
     try{result=JSON.parse(raw)}catch{}
     if(!response.ok)throw new Error(result.error||"Server AI mengembalikan error.");
     renderAiResult(result);
   }catch(error){
+    if(error&&error.name==="AbortError")error=new Error("Analisis AI melewati batas waktu. Coba Generate ulang.");
     console.error(error);
     const fallback={
       score:7.8,

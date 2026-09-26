@@ -253,6 +253,8 @@ function renderAiResult(result){
   if(strengths.length)analysisParts.push("<section><h4>Kekuatan visual</h4><ul>"+strengths.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
   if(weaknesses.length)analysisParts.push("<section><h4>Yang bisa diperbaiki</h4><ul>"+weaknesses.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
   const analysis=$("#mediaAnalysis");if(analysis)analysis.innerHTML=analysisParts.join("")||"<p>"+escapeHtml(m.analysis)+"</p>";
+  const platformStrategy=$("#platformStrategy");if(platformStrategy)platformStrategy.textContent=result.platform_strategy||"Sesuaikan format, gaya hook, dan CTA dengan platform yang dipilih.";
+  const platformTips=$("#platformTips");if(platformTips){const items=Array.isArray(result.platform_tips)&&result.platform_tips.length?result.platform_tips:["Sesuaikan pembuka dengan kebiasaan konsumsi platform.","Jaga format dan panjang copy tetap sesuai konteks platform.","Gunakan CTA yang mendorong aksi sesuai tujuan konten."];platformTips.innerHTML=items.slice(0,4).map(x=>"<li>"+escapeHtml(x)+"</li>").join("");}
   const visualText=$("#visualText");if(visualText)visualText.textContent=result.visual_text||m.visual;
   const videoCard=$("#videoStrategyCard"),photoCard=$("#photoStrategyCard");
   if(videoCard)videoCard.hidden=mode==="FOTO";

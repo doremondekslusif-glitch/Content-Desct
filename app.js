@@ -240,8 +240,6 @@ function renderAiResult(result){
   const visualDetails=String(result.visual_details||"").trim();
   const detailBox=$("#visualDetails");
   if(detailBox)detailBox.innerHTML=visualDetails?"<div class=\"visual-detail\"><span>"+escapeHtml(visualDetails)+"</span></div>":"<p>Detail visual belum tersedia.</p>";
-  const detailBox=$("#visualDetails");
-  if(detailBox)detailBox.innerHTML=detailHtml||"<p>Detail visual belum tersedia.</p>";
   const analysisParts=[];
   if(result.media_analysis)analysisParts.push("<section><h4>Analisis utama</h4><p>"+escapeHtml(result.media_analysis)+"</p></section>");
   if(strengths.length)analysisParts.push("<section><h4>Kekuatan visual</h4><ul>"+strengths.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");

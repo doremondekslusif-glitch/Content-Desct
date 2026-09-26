@@ -261,7 +261,7 @@ if(styleVariations){
     return "<article class=\"style-variation\"><div class=\"style-variation-head\"><strong>"+escapeHtml(style)+"</strong><button type=\"button\" class=\"copy-btn style-copy\" data-style-index=\""+i+"\">Salin</button></div><div class=\"style-field\"><span>Hook</span><p>"+escapeHtml(String(v&&v.hook||""))+"</p></div><div class=\"style-field\"><span>Caption</span><p>"+escapeHtml(String(v&&v.caption||""))+"</p></div><div class=\"style-field\"><span>CTA</span><p>"+escapeHtml(String(v&&v.cta||""))+"</p></div><div class=\"style-field\"><span>Hashtag</span><p>"+escapeHtml(String(v&&v.hashtags||""))+"</p></div></article>";
   }).join("");
   if(!variations.length)styleVariations.innerHTML="<p>Variasi gaya belum tersedia.</p>";
-  $(\".style-copy\").forEach(btn=>btn.addEventListener(\"click\",()=>{
+  $(".style-copy").forEach(btn=>btn.addEventListener("click",()=>{
     const v=variations[Number(btn.dataset.styleIndex)];
     if(!v)return;
     copyText([v.style,v.hook,v.caption,v.cta,v.hashtags].filter(Boolean).join(\"\\n\\n\")).then(()=>showToast(\"Gaya berhasil disalin ✓\"));

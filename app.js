@@ -237,6 +237,19 @@ function renderAiResult(result){
   if(result.audience_fit)insightParts.push("Audiens: "+result.audience_fit);
   if(result.platform_strategy)insightParts.push("Strategi: "+result.platform_strategy);
   $("#mediaInsight").textContent=insightParts.join("\n\n")||"AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
+  const visualDetails=result.visual_details||{};
+  const detailLabels=[
+    ["Subjek utama",visualDetails.subjects],
+    ["Setting",visualDetails.setting],
+    ["Komposisi",visualDetails.composition],
+    ["Warna",visualDetails.colors],
+    ["Teks terlihat",visualDetails.visible_text],
+    ["Aksi / penggunaan",visualDetails.action_or_use],
+    ["Mood visual",visualDetails.mood]
+  ];
+  const detailHtml=detailLabels.filter(x=>String(x[1]??"").trim()).map(x=>"<div class=\"visual-detail\"><strong>"+escapeHtml(x[0])+"</strong><span>"+escapeHtml(x[1])+"</span></div>").join("");
+  const detailBox=$("#visualDetails");
+  if(detailBox)detailBox.innerHTML=detailHtml||"<p>Detail visual belum tersedia.</p>";
   const analysisParts=[];
   if(result.media_analysis)analysisParts.push("<section><h4>Analisis utama</h4><p>"+escapeHtml(result.media_analysis)+"</p></section>");
   if(strengths.length)analysisParts.push("<section><h4>Kekuatan visual</h4><ul>"+strengths.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");

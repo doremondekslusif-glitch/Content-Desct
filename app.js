@@ -10,7 +10,7 @@ X:{hook:"Barang sederhana, tapi ternyata kepakai setiap hari.",caption:"Suka men
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 $$(".platform").forEach(btn=>btn.addEventListener("click",()=>{state.platform=btn.dataset.platform;$$(".platform").forEach(x=>x.classList.toggle("selected",x===btn));$("#platformNote").textContent=platformNotes[state.platform]}));
 $$(".focus").forEach(btn=>btn.addEventListener("click",()=>{state.focus=btn.dataset.focus;$$(".focus").forEach(x=>x.classList.toggle("selected",x===btn))}));
-$$(".option").forEach(btn=>btn.addEventListener("click",()=>{const type=btn.dataset.audience!==undefined?"audience":"tone";state[type]=btn.dataset[type];$(".option").filter(x=>x.dataset[type]!==undefined).forEach(x=>x.classList.toggle("selected",x===btn))}));
+$(".option").forEach(btn=>btn.addEventListener("click",()=>{const type=btn.dataset.audience!==undefined?"audience":"tone";state[type]=btn.dataset[type];$(".option").filter(x=>x.dataset[type]!==undefined).forEach(x=>x.classList.toggle("selected",x===btn))}));
 function showStep(step){$$(".step").forEach(x=>x.classList.toggle("active",x.dataset.step===String(step)));$("#platformPanel").hidden=step!==1;$("#contentPanel").hidden=step!==2;$("#results").hidden=step!==3;if(step===2)$("#contentPanel").scrollIntoView({behavior:"smooth",block:"start"});if(step===3)$("#results").scrollIntoView({behavior:"smooth",block:"start"})}
 $("#nextToContent").addEventListener("click",()=>showStep(2));
 $("#backToPlatform").addEventListener("click",()=>showStep(1));

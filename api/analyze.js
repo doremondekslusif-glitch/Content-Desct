@@ -18,7 +18,6 @@ const RESPONSE_SCHEMA={
     },
     media_analysis:{type:"string"},
     visual_summary:{type:"string"},
-    visual_details:{type:"string"},
     visual_strengths:{type:"array",items:{type:"string"}},
     visual_weaknesses:{type:"array",items:{type:"string"}},
     audience_fit:{type:"string"},
@@ -41,7 +40,7 @@ const RESPONSE_SCHEMA={
     content_ideas:{type:"array",items:{type:"string"}},
     tips:{type:"array",items:{type:"string"}}
   },
-  required:["score","score_reason","score_breakdown","media_analysis","visual_summary","visual_details","visual_strengths","visual_weaknesses","audience_fit","platform_strategy","platform_tips","style_variations","content_mode","hook","hook_usage","hook_options","video_hook","voiceover","video_structure","on_screen_text","photo_strategy","caption","hashtags","cta","visual_text","content_ideas","tips"]
+  required:["score","score_reason","score_breakdown","media_analysis","visual_summary","visual_strengths","visual_weaknesses","audience_fit","platform_strategy","platform_tips","style_variations","content_mode","hook","hook_usage","hook_options","video_hook","voiceover","video_structure","on_screen_text","photo_strategy","caption","hashtags","cta","visual_text","content_ideas","tips"]
 };
 
 function cors(res){
@@ -76,23 +75,26 @@ function buildPrompt(o){
     "13. Lakukan pemeriksaan akhir agar semua output konsisten dengan bukti visual dan pilihan pengguna.\n"+
     "14. Sesuaikan format dan gaya output secara spesifik dengan platform yang dipilih. Instagram: visual-first, hook singkat, caption ringkas-menengah, CTA interaksi/simpan. TikTok: hook sangat cepat, bahasa native video pendek, retention dan payoff. Facebook: konteks lebih jelas, conversational, dorong komentar/share. YouTube: kuatkan alasan menonton, judul/thumbnail logic, dan struktur yang menjaga retention; untuk Shorts tetap cepat. Threads: utamakan percakapan, opini/cerita natural, hashtag minimal. X: kalimat pembuka padat, mudah dibalas/di-quote, media sebagai pendukung. Jangan mengklaim aturan algoritma yang pasti.\n"+
     "15. Isi platform_strategy dengan arahan praktis untuk platform yang dipilih dan platform_tips dengan 3 tips yang benar-benar spesifik terhadap platform tersebut.\n"+
-    "16. Buat style_variations berisi tepat 3 versi dari ide konten yang sama: Natural & santai, Persuasif, dan Storytelling. Pertahankan fakta yang terlihat di media dan jangan mengarang klaim baru. Setiap versi wajib memiliki style, hook, caption, cta, dan hashtags. Sesuaikan setiap versi dengan platform, tujuan, audiens, dan mode media.\n\n"+
+    "16. Buat style_variations berisi tepat 3 versi yang benar-benar berbeda: Natural & santai, Persuasif, dan Storytelling. Jangan hanya mengganti satu-dua kata. Ubah sudut pembuka, susunan caption, cara menyampaikan manfaat, dan CTA pada tiap versi, tetapi pertahankan fakta yang terlihat di media. Setiap versi wajib memiliki style, hook, caption, cta, dan hashtags.\n"+
+    "17. Setiap generate ulang harus menghasilkan pendekatan baru. Gunakan variationToken sebagai sinyal variasi. Jangan menyalin hook, caption, CTA, atau susunan kalimat dari hasil sebelumnya jika tidak diperlukan oleh fakta media.\n\n"+
     "KONTEKS:\n"+
     "Platform: "+o.platform+"\n"+
     "Tujuan: "+o.goal+"\n"+
     "Fokus: "+(o.context||"(tidak ada)")+"\n"+
     "Target audiens: "+o.audience+"\n"+
     "Gaya bahasa: "+o.tone+"\n"+
-    "Mode media: "+o.contentMode+"\n\n"+
+    "Mode media: "+o.contentMode+"\n"+
+    "Variation token: "+(o.variationToken||"baru")+"\n\n"+
     "ATURAN KUALITAS:\n"+
     "- Gunakan Bahasa Indonesia natural dan konkret.\n"+
     "- Jangan menjanjikan viral, trending, pasti laku, atau performa tertentu.\n"+
-    "- Buat 3 hook dengan pendekatan berbeda: curiosity, benefit, dan relatable/story.\n"+
+    "- Buat tepat 3 hook_options dengan pendekatan berbeda: curiosity, benefit, dan relatable/story. Hook utama juga harus spesifik terhadap media.\n"+
     "- Hook harus cocok dengan mode media: caption untuk foto; voice-over/teks awal untuk video.\n"+
     "- Caption harus sesuai platform dan tujuan. Untuk video, buat caption ringkas dan tidak mengulang penjelasan panjang.\n"+
     "- Hashtag hanya yang relevan dengan isi media dan konteks.\n"+
     "- CTA harus sesuai tujuan; jangan selalu mengarah ke pembelian.\n"+
     "- Ide konten berikutnya harus berasal dari media yang dianalisis.\n"+
+    "- visual_text wajib berasal dari media yang benar-benar terlihat: jika ada teks pada gambar/video, gunakan atau adaptasi teks yang terbaca; jika tidak ada teks yang layak, buat overlay singkat yang relevan dengan objek atau adegan yang terlihat. Jangan memakai kalimat generik yang tidak terkait media.\n"+
     "- Skor adalah kesiapan dan kecocokan konten, bukan prediksi viral.\n\n"+
     "Kembalikan HANYA JSON sesuai schema.";
 }
@@ -123,6 +125,8 @@ async function callGemini(model,parts){
           responseMimeType:"application/json",
           responseSchema:RESPONSE_SCHEMA,
           thinkingConfig:{thinkingLevel:"medium"},
+          temperature:0.9,
+          topP:0.95,
           maxOutputTokens:5000
         }
       })
@@ -149,11 +153,12 @@ export default async function handler(req,res){
     var context=body.context||"";
     var audience=body.audience||"Umum";
     var tone=body.tone||"Natural & santai";
+    var variationToken=body.variationToken||"";
     var contentMode=body.contentMode||"FOTO";
     var media=body.media||[];
     if(!Array.isArray(media)||!media.length)return res.status(400).json({error:"Tidak ada media untuk dianalisis."});
     if(media.length>20)return res.status(400).json({error:"Jumlah frame/media terlalu banyak."});
-    var parts=buildParts({platform:platform,goal:goal,context:context,audience:audience,tone:tone,contentMode:contentMode,media:media});
+    var parts=buildParts({platform:platform,goal:goal,context:context,audience:audience,tone:tone,contentMode:contentMode,variationToken:variationToken,media:media});
     if(parts.length===1)return res.status(400).json({error:"Media gambar/frame tidak valid."});
     var lastError=null;
     for(var j=0;j<DEFAULT_MODELS.length;j++){

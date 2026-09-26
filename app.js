@@ -1,12 +1,26 @@
 const state={platform:"Instagram",goal:"Jangkauan",focus:"Hook audiens",audience:"Umum",tone:"Natural & santai",files:[],selectedHook:""};
 const platformNotes={Instagram:"Sesuaikan rekomendasi dengan karakter Instagram.",TikTok:"Fokus pada hook cepat, retention, dan discovery.",Facebook:"Cocokkan dengan percakapan dan engagement komunitas.",YouTube:"Perkuat judul, hook, dan alasan untuk menonton.",Threads:"Utamakan percakapan dan gaya yang natural.",X:"Buat pembuka singkat yang memancing respons."};
 const data={
-Instagram:{hook:"Ternyata hal kecil ini bisa bikin rutinitas sehari-hari jadi jauh lebih praktis 👀",caption:"Hal kecil yang ternyata kepakai setiap hari ✨\n\nKalau kamu suka sesuatu yang simpel, praktis, dan tetap enak dilihat, ini bisa jadi salah satu yang wajib masuk daily essentials kamu.\n\nMenurut kamu, bagian paling menarik dari konten ini apa?",hashtags:"#InstagramIndonesia #ContentCreator #LifestyleIndonesia #DailyEssentials #Rekomendasi #ExploreIndonesia",cta:"Kalau kamu suka konten seperti ini, simpan dulu dan kasih tahu pendapatmu di komentar.",tips:["Buat 1–2 detik pertama langsung menampilkan objek atau hasil utama.","Tambahkan teks pendek di video agar pesan tetap terbaca tanpa suara.","Akhiri dengan pertanyaan sederhana untuk mendorong komentar."]},
-TikTok:{hook:"POV: kamu baru sadar barang ini ternyata bakal kepakai terus 😳",caption:"POV: awalnya cuma penasaran, akhirnya jadi barang yang selalu dibawa 😭✨\n\nKamu tim bawa barang seperlunya atau tim semua harus ada di tas?",hashtags:"#TikTokIndonesia #FYPIndonesia #KontenIndonesia #Lifestyle #Rekomendasi #Tips",cta:"Kamu tim yang mana? Tulis di komentar 👇",tips:["Tampilkan momen paling menarik sejak frame pertama.","Gunakan teks layar yang singkat dan mudah dipindai.","Jaga tempo video agar tidak terlalu lama sebelum payoff."]},
-Facebook:{hook:"Satu hal sederhana yang ternyata bikin aktivitas harian lebih praktis.",caption:"Kadang kita tidak membutuhkan sesuatu yang rumit. Yang penting praktis, berguna, dan benar-benar dipakai setiap hari. ✨\n\nApa barang yang paling sering kamu bawa setiap hari?",hashtags:"#FacebookIndonesia #Lifestyle #Inspirasi #Rekomendasi #DailyLife",cta:"Tag teman yang mungkin suka konten seperti ini.",tips:["Gunakan caption yang terasa seperti percakapan.","Dorong komentar dengan pertanyaan yang relevan.","Pastikan thumbnail langsung menjelaskan isi konten."]},
-YouTube:{hook:"Kenapa saya baru menemukan ini sekarang?",caption:"Di video ini kita lihat lebih dekat hal yang kelihatannya sederhana, tapi ternyata cukup berguna untuk rutinitas sehari-hari.\n\nTonton sampai akhir dan lihat apakah ini cocok buat kamu.",hashtags:"#YouTubeIndonesia #ShortsIndonesia #Review #Lifestyle #Tips",cta:"Kalau bermanfaat, subscribe dan cek video berikutnya.",tips:["Pastikan 3 detik pertama menjelaskan alasan untuk menonton.","Gunakan judul yang spesifik, bukan sekadar deskriptif.","Buat thumbnail/frame awal yang mudah dipahami."]},
-Threads:{hook:"Ada nggak sih barang kecil yang akhirnya jadi barang wajib?",caption:"Awalnya kupikir biasa saja. Ternyata setelah dipakai beberapa kali, malah jadi salah satu barang yang paling sering dicari. 😅\n\nAda barang seperti itu juga di kamu?",hashtags:"#ThreadsIndonesia #DailyLife #Lifestyle #Cerita",cta:"Ceritakan versi kamu di reply.",tips:["Pertahankan bahasa natural dan personal.","Gunakan pertanyaan terbuka untuk memulai percakapan.","Hindari terlalu banyak hashtag agar terasa organik."]},
-X:{hook:"Barang sederhana, tapi ternyata kepakai setiap hari.",caption:"Suka menemukan barang yang awalnya terlihat biasa, tapi setelah dipakai malah jadi daily essential?\n\nIni salah satunya.",hashtags:"#Lifestyle #Rekomendasi #DailyEssentials",cta:"Setuju atau tidak?",tips:["Buat kalimat pertama sepadat mungkin.","Sisakan ruang untuk orang membalas atau quote-post.","Gunakan media sebagai pelengkap pesan, bukan pengganti konteks."]}};
+Instagram:{hook:"Ternyata hal kecil ini bisa bikin rutinitas sehari-hari jadi jauh lebih praktis 👀",caption:"Hal kecil yang ternyata kepakai setiap hari ✨
+
+Kalau kamu suka sesuatu yang simpel, praktis, dan tetap enak dilihat, ini bisa jadi salah satu yang wajib masuk daily essentials kamu.
+
+Menurut kamu, bagian paling menarik dari konten ini apa?",hashtags:"#InstagramIndonesia #ContentCreator #LifestyleIndonesia #DailyEssentials #Rekomendasi #ExploreIndonesia",cta:"Kalau kamu suka konten seperti ini, simpan dulu dan kasih tahu pendapatmu di komentar.",tips:["Buat 1–2 detik pertama langsung menampilkan objek atau hasil utama.","Tambahkan teks pendek di video agar pesan tetap terbaca tanpa suara.","Akhiri dengan pertanyaan sederhana untuk mendorong komentar."]},
+TikTok:{hook:"POV: kamu baru sadar barang ini ternyata bakal kepakai terus 😳",caption:"POV: awalnya cuma penasaran, akhirnya jadi barang yang selalu dibawa 😭✨
+
+Kamu tim bawa barang seperlunya atau tim semua harus ada di tas?",hashtags:"#TikTokIndonesia #FYPIndonesia #KontenIndonesia #Lifestyle #Rekomendasi #Tips",cta:"Kamu tim yang mana? Tulis di komentar 👇",tips:["Tampilkan momen paling menarik sejak frame pertama.","Gunakan teks layar yang singkat dan mudah dipindai.","Jaga tempo video agar tidak terlalu lama sebelum payoff."]},
+Facebook:{hook:"Satu hal sederhana yang ternyata bikin aktivitas harian lebih praktis.",caption:"Kadang kita tidak membutuhkan sesuatu yang rumit. Yang penting praktis, berguna, dan benar-benar dipakai setiap hari. ✨
+
+Apa barang yang paling sering kamu bawa setiap hari?",hashtags:"#FacebookIndonesia #Lifestyle #Inspirasi #Rekomendasi #DailyLife",cta:"Tag teman yang mungkin suka konten seperti ini.",tips:["Gunakan caption yang terasa seperti percakapan.","Dorong komentar dengan pertanyaan yang relevan.","Pastikan thumbnail langsung menjelaskan isi konten."]},
+YouTube:{hook:"Kenapa saya baru menemukan ini sekarang?",caption:"Di video ini kita lihat lebih dekat hal yang kelihatannya sederhana, tapi ternyata cukup berguna untuk rutinitas sehari-hari.
+
+Tonton sampai akhir dan lihat apakah ini cocok buat kamu.",hashtags:"#YouTubeIndonesia #ShortsIndonesia #Review #Lifestyle #Tips",cta:"Kalau bermanfaat, subscribe dan cek video berikutnya.",tips:["Pastikan 3 detik pertama menjelaskan alasan untuk menonton.","Gunakan judul yang spesifik, bukan sekadar deskriptif.","Buat thumbnail/frame awal yang mudah dipahami."]},
+Threads:{hook:"Ada nggak sih barang kecil yang akhirnya jadi barang wajib?",caption:"Awalnya kupikir biasa saja. Ternyata setelah dipakai beberapa kali, malah jadi salah satu barang yang paling sering dicari. 😅
+
+Ada barang seperti itu juga di kamu?",hashtags:"#ThreadsIndonesia #DailyLife #Lifestyle #Cerita",cta:"Ceritakan versi kamu di reply.",tips:["Pertahankan bahasa natural dan personal.","Gunakan pertanyaan terbuka untuk memulai percakapan.","Hindari terlalu banyak hashtag agar terasa organik."]},
+X:{hook:"Barang sederhana, tapi ternyata kepakai setiap hari.",caption:"Suka menemukan barang yang awalnya terlihat biasa, tapi setelah dipakai malah jadi daily essential?
+
+Ini salah satunya.",hashtags:"#Lifestyle #Rekomendasi #DailyEssentials",cta:"Setuju atau tidak?",tips:["Buat kalimat pertama sepadat mungkin.","Sisakan ruang untuk orang membalas atau quote-post.","Gunakan media sebagai pelengkap pesan, bukan pengganti konteks."]}};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 $$(".platform").forEach(btn=>btn.addEventListener("click",()=>{state.platform=btn.dataset.platform;$$(".platform").forEach(x=>x.classList.toggle("selected",x===btn));$("#platformNote").textContent=platformNotes[state.platform]}));
 $$(".focus").forEach(btn=>btn.addEventListener("click",()=>{state.focus=btn.dataset.focus;$$(".focus").forEach(x=>x.classList.toggle("selected",x===btn))}));
@@ -100,7 +114,13 @@ function setGenerating(isGenerating){
   btn.innerHTML=isGenerating?"<span>◌</span> AI sedang menganalisis media...":"<span>✦</span> Analisis & Generate";
 }
 
-function formatText(text){return String(text||"").replace(/\r\n/g,"\n").replace(/\n{3,}/g,"\n\n").split("\n").map(x=>x.trim()?`<div>${escapeHtml(x.trim())}</div>`:"<div class=\"text-gap\"></div>").join("");}
+function formatText(text){return String(text||"").replace(/\r
+/g,"
+").replace(/
+{3,}/g,"
+
+").split("
+").map(x=>x.trim()?`<div>${escapeHtml(x.trim())}</div>`:"<div class=\"text-gap\"></div>").join("");}
 function escapeHtml(text){const el=document.createElement("div");el.textContent=text;return el.innerHTML;}
 function renderAiResult(result){
   const d=data[state.platform],ctx=state.focus,m=getMediaProfile();
@@ -109,7 +129,9 @@ function renderAiResult(result){
   $("#mediaAnalysis").textContent=result.media_analysis||m.analysis;
   $("#visualText").textContent=result.visual_text||m.visual;
   $("#hook").textContent=result.hook||d.hook;
-  $("#caption").innerHTML=formatText(ctx&&result.caption?result.caption+"\n\nKonteks tambahan: "+ctx:(result.caption||d.caption));
+  $("#caption").innerHTML=formatText(ctx&&result.caption?result.caption+"
+
+Konteks tambahan: "+ctx:(result.caption||d.caption));
   $("#hashtags").textContent=result.hashtags||d.hashtags;
   $("#cta").textContent=result.cta||d.cta;
   const tips=Array.isArray(result.tips)?result.tips:d.tips;
@@ -130,7 +152,9 @@ async function generate(){
     $("#mediaAnalysis").textContent=m.analysis;
     $("#visualText").textContent=m.visual;
     $("#hook").textContent=d.hook;
-    $("#caption").textContent=ctx?d.caption+"\n\nKonteks tambahan: "+ctx:d.caption;
+    $("#caption").textContent=ctx?d.caption+"
+
+Konteks tambahan: "+ctx:d.caption;
     $("#hashtags").textContent=d.hashtags; $("#cta").textContent=d.cta;
     $("#tips").innerHTML=d.tips.map(x=>"<li>"+x+"</li>").join("");
     $("#score").textContent="8.2"; $("#scoreBar").style.width="82%";
@@ -160,7 +184,12 @@ async function generate(){
   }finally{setGenerating(false)}
 }
 $("#generateBtn").addEventListener("click",generate);$("#regenerateBtn").addEventListener("click",generate);$("#backToContent").addEventListener("click",()=>showStep(2));
-async function copyText(text){try{await navigator.clipboard.writeText(text);showToast("Berhasil disalin ✓")}catch(error){showToast("Gagal menyalin, coba lagi.")}}\n$(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{await copyText($("#"+btn.dataset.copy).textContent)}));\n$("#copyAllBtn").addEventListener("click",async()=>{const sections=[["Pilihan Hook",$("#hookOptions").textContent],["Analisis media",$("#mediaAnalysis").textContent],["Hook",$("#hook").textContent],["Caption",$("#caption").textContent],["Hashtag",$("#hashtags").textContent],["Ide teks visual",$("#visualText").textContent],["CTA",$("#cta").textContent],["Ide konten berikutnya",$("#contentIdeas").textContent],["Saran optimasi",$("#tips").textContent]];await copyText(sections.map(([title,value])=>title+"\n"+value.trim()).join("\n\n"))});
+async function copyText(text){try{await navigator.clipboard.writeText(text);showToast("Berhasil disalin ✓")}catch(error){showToast("Gagal menyalin, coba lagi.")}}
+$(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{await copyText($("#"+btn.dataset.copy).textContent)}));
+$("#copyAllBtn").addEventListener("click",async()=>{const sections=[["Pilihan Hook",$("#hookOptions").textContent],["Analisis media",$("#mediaAnalysis").textContent],["Hook",$("#hook").textContent],["Caption",$("#caption").textContent],["Hashtag",$("#hashtags").textContent],["Ide teks visual",$("#visualText").textContent],["CTA",$("#cta").textContent],["Ide konten berikutnya",$("#contentIdeas").textContent],["Saran optimasi",$("#tips").textContent]];await copyText(sections.map(([title,value])=>title+"
+"+value.trim()).join("
+
+"))});
 function showToast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1600)}
 const zone=$("#uploadZone");["dragenter","dragover"].forEach(e=>zone.addEventListener(e,x=>{x.preventDefault();zone.style.borderColor="#9b7cff"}));["dragleave","drop"].forEach(e=>zone.addEventListener(e,x=>{x.preventDefault();zone.style.borderColor=""}));zone.addEventListener("drop",e=>addFiles([...e.dataTransfer.files].filter(f=>f.type.startsWith("image/")||f.type.startsWith("video/"))));
 // Vercel auto-deploy test

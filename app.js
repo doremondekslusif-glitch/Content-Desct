@@ -202,8 +202,18 @@ function renderAiResult(result){
   const ideas=Array.isArray(result.content_ideas)&&result.content_ideas.length?result.content_ideas:["Buat postingan yang menonjolkan manfaat utama.","Tunjukkan cara penggunaan dalam kehidupan sehari-hari.","Buat perbandingan sebelum dan sesudah menggunakan produk.","Jawab pertanyaan yang paling sering ditanyakan audiens.","Buat versi video pendek dari konten ini."];
   $("#contentIdeas").innerHTML=ideas.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
   $("#mediaSummary").textContent=m.label;
-  $("#mediaInsight").textContent="AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
-  $("#mediaAnalysis").textContent=result.media_analysis||m.analysis;
+  const strengths=Array.isArray(result.visual_strengths)?result.visual_strengths:[];
+  const weaknesses=Array.isArray(result.visual_weaknesses)?result.visual_weaknesses:[];
+  const insightParts=[];
+  if(result.visual_summary)insightParts.push("Ringkasan: "+result.visual_summary);
+  if(result.audience_fit)insightParts.push("Audiens: "+result.audience_fit);
+  if(result.platform_strategy)insightParts.push("Strategi: "+result.platform_strategy);
+  $("#mediaInsight").textContent=insightParts.join("\\n\\n")||"AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
+  const analysisParts=[];
+  if(result.media_analysis)analysisParts.push(result.media_analysis);
+  if(strengths.length)analysisParts.push("Kekuatan visual:\\n• "+strengths.join("\\n• "));
+  if(weaknesses.length)analysisParts.push("Yang bisa diperbaiki:\\n• "+weaknesses.join("\\n• "));
+  $("#mediaAnalysis").textContent=analysisParts.join("\\n\\n")||m.analysis;
   $("#visualText").textContent=result.visual_text||m.visual;
   $("#hook").textContent=result.hook||d.hook;
   $("#caption").innerHTML=formatText(result.caption||d.caption);
@@ -213,7 +223,10 @@ function renderAiResult(result){
   $("#tips").innerHTML=tips.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
   const score=Number(result.score),safeScore=Number.isFinite(score)?Math.max(0,Math.min(10,score)):8.9;
   $("#score").textContent=safeScore.toFixed(1);$("#scoreBar").style.width=(safeScore*10)+"%";
-  $("#scoreText").textContent=(result.score_reason||goalText[state.goal])+" Hasil ini dibuat dari analisis media yang diunggah.";
+  const breakdown=result.score_breakdown||{};
+  const breakdownText=[["Visual",breakdown.visual],["Pesan",breakdown.message],["Platform",breakdown.platform],["Audiens",breakdown.audience]]
+    .filter(x=>Number.isFinite(Number(x[1]))).map(x=>x[0]+" "+Number(x[1]).toFixed(1)).join(" · ");
+  $("#scoreText").textContent=(result.score_reason||goalText[state.goal])+(breakdownText?" | "+breakdownText:"");
   showStep(3);
 }
 

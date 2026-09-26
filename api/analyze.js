@@ -24,6 +24,7 @@ const RESPONSE_SCHEMA={
     audience_fit:{type:"string"},
     platform_strategy:{type:"string"},
     platform_tips:{type:"array",items:{type:"string"}},
+    style_variations:{type:"array",items:{type:"object",properties:{style:{type:"string"},hook:{type:"string"},caption:{type:"string"},cta:{type:"string"},hashtags:{type:"string"}},required:["style","hook","caption","cta","hashtags"]}},
     content_mode:{type:"string"},
     hook:{type:"string"},
     hook_usage:{type:"string"},
@@ -40,7 +41,7 @@ const RESPONSE_SCHEMA={
     content_ideas:{type:"array",items:{type:"string"}},
     tips:{type:"array",items:{type:"string"}}
   },
-  required:["score","score_reason","score_breakdown","media_analysis","visual_summary","visual_strengths","visual_weaknesses","audience_fit","platform_strategy","platform_tips","content_mode","hook","hook_usage","hook_options","video_hook","voiceover","video_structure","on_screen_text","photo_strategy","caption","hashtags","cta","visual_text","content_ideas","tips"]
+  required:["score","score_reason","score_breakdown","media_analysis","visual_summary","visual_strengths","visual_weaknesses","audience_fit","platform_strategy","platform_tips","style_variations","content_mode","hook","hook_usage","hook_options","video_hook","voiceover","video_structure","on_screen_text","photo_strategy","caption","hashtags","cta","visual_text","content_ideas","tips"]
 };
 
 function cors(res){
@@ -74,7 +75,8 @@ function buildPrompt(o){
     "12. Untuk visual_details, jelaskan subjek, setting, komposisi, warna, teks yang benar-benar terbaca, aksi/penggunaan yang terlihat, dan mood visual. Jika sesuatu tidak terlihat jelas, tulis bahwa tidak terlihat jelas; jangan menebak.\n"+
     "13. Lakukan pemeriksaan akhir agar semua output konsisten dengan bukti visual dan pilihan pengguna.\n"+
     "14. Sesuaikan format dan gaya output secara spesifik dengan platform yang dipilih. Instagram: visual-first, hook singkat, caption ringkas-menengah, CTA interaksi/simpan. TikTok: hook sangat cepat, bahasa native video pendek, retention dan payoff. Facebook: konteks lebih jelas, conversational, dorong komentar/share. YouTube: kuatkan alasan menonton, judul/thumbnail logic, dan struktur yang menjaga retention; untuk Shorts tetap cepat. Threads: utamakan percakapan, opini/cerita natural, hashtag minimal. X: kalimat pembuka padat, mudah dibalas/di-quote, media sebagai pendukung. Jangan mengklaim aturan algoritma yang pasti.\n"+
-    "15. Isi platform_strategy dengan arahan praktis untuk platform yang dipilih dan platform_tips dengan 3 tips yang benar-benar spesifik terhadap platform tersebut.\n\n"+
+    "15. Isi platform_strategy dengan arahan praktis untuk platform yang dipilih dan platform_tips dengan 3 tips yang benar-benar spesifik terhadap platform tersebut.\n"+
+    "16. Buat style_variations berisi tepat 3 versi dari ide konten yang sama: Natural & santai, Persuasif, dan Storytelling. Pertahankan fakta yang terlihat di media dan jangan mengarang klaim baru. Setiap versi wajib memiliki style, hook, caption, cta, dan hashtags. Sesuaikan setiap versi dengan platform, tujuan, audiens, dan mode media.\n\n"+
     "KONTEKS:\n"+
     "Platform: "+o.platform+"\n"+
     "Tujuan: "+o.goal+"\n"+

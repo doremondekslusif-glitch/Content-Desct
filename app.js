@@ -195,6 +195,9 @@ function formatText(text){
 
 function renderAiResult(result){
   const d=data[state.platform]||data.Instagram,m=getMediaProfile();
+  const hasVideo=state.files.some(f=>f.type.startsWith("video/"));
+  const hasImage=state.files.some(f=>f.type.startsWith("image/"));
+  const mode=hasVideo&&hasImage?"CAMPURAN":hasVideo?"VIDEO":"FOTO";
   const hooks=Array.isArray(result.hook_options)&&result.hook_options.length?result.hook_options:[result.hook||d.hook,"POV: ini mungkin yang sedang kamu cari.","Sederhana, tapi ternyata berguna setiap hari."];
   const hookBox=$("#hookOptions");hookBox.innerHTML="";
   hooks.slice(0,5).forEach((hook,i)=>{
@@ -222,6 +225,12 @@ function renderAiResult(result){
   $("#mediaAnalysis").innerHTML=analysisParts.join("")||"<p>"+escapeHtml(m.analysis)+"</p>";
   $("#visualText").textContent=result.visual_text||m.visual;
   $("#hook").textContent=result.hook||d.hook;
+  const hookCard=$("#hookCardTitle");
+  const hookHelp=$("#hookHelp");
+  if(hookCard)hookCard.textContent=mode==="VIDEO"?"🎬 Hook Video":mode==="CAMPURAN"?"🎬 Hook Utama":"🔥 Hook Caption";
+  if(hookHelp)hookHelp.textContent=result.hook_usage||(mode==="VIDEO"?"Gunakan di voice-over atau teks pada 1–3 detik pertama video.":"Gunakan sebagai kalimat pertama caption.");
+  const captionCard=$("#captionCardTitle");
+  if(captionCard)captionCard.textContent=mode==="VIDEO"?"✍️ Caption singkat":"✍️ Caption";
   $("#caption").innerHTML=formatText(result.caption||d.caption);
   $("#hashtags").textContent=result.hashtags||d.hashtags;
   $("#cta").textContent=result.cta||d.cta;
@@ -252,7 +261,8 @@ async function generate(){
       return;
     }
     const media=await buildMediaPayload();
-    const requestBody=JSON.stringify({platform:state.platform,goal:state.goal,context:state.focus,audience:state.audience,tone:state.tone,media});
+    const contentMode=state.files.some(f=>f.type.startsWith("video/"))?(state.files.some(f=>f.type.startsWith("image/"))?"CAMPURAN":"VIDEO"):"FOTO";
+    const requestBody=JSON.stringify({platform:state.platform,goal:state.goal,context:state.focus,audience:state.audience,tone:state.tone,contentMode,media});
     if(new Blob([requestBody]).size>4*1024*1024)throw new Error("Media terlalu besar untuk dikirim. Kurangi jumlah atau ukuran file.");
     const response=await fetch(ANALYZER_API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:requestBody});
     const raw=await response.text();let result={};

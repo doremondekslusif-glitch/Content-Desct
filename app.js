@@ -253,7 +253,22 @@ function renderAiResult(result){
   if(strengths.length)analysisParts.push("<section><h4>Kekuatan visual</h4><ul>"+strengths.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
   if(weaknesses.length)analysisParts.push("<section><h4>Yang bisa diperbaiki</h4><ul>"+weaknesses.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
   const analysis=$("#mediaAnalysis");if(analysis)analysis.innerHTML=analysisParts.join("")||"<p>"+escapeHtml(m.analysis)+"</p>";
-  const platformStrategy=$("#platformStrategy");if(platformStrategy)platformStrategy.textContent=result.platform_strategy||"Sesuaikan format, gaya hook, dan CTA dengan platform yang dipilih.";
+  const styleVariations=$("#styleVariations");
+if(styleVariations){
+  const variations=Array.isArray(result.style_variations)&&result.style_variations.length?result.style_variations:[];
+  styleVariations.innerHTML=variations.slice(0,3).map((v,i)=>{
+    const style=String(v&&v.style||["Natural & santai","Persuasif","Storytelling"][i]||"Gaya alternatif");
+    return "<article class=\"style-variation\"><div class=\"style-variation-head\"><strong>"+escapeHtml(style)+"</strong><button type=\"button\" class=\"copy-btn style-copy\" data-style-index=\""+i+"\">Salin</button></div><div class=\"style-field\"><span>Hook</span><p>"+escapeHtml(String(v&&v.hook||""))+"</p></div><div class=\"style-field\"><span>Caption</span><p>"+escapeHtml(String(v&&v.caption||""))+"</p></div><div class=\"style-field\"><span>CTA</span><p>"+escapeHtml(String(v&&v.cta||""))+"</p></div><div class=\"style-field\"><span>Hashtag</span><p>"+escapeHtml(String(v&&v.hashtags||""))+"</p></div></article>";
+  }).join("");
+  if(!variations.length)styleVariations.innerHTML="<p>Variasi gaya belum tersedia.</p>";
+  $(\".style-copy\").forEach(btn=>btn.addEventListener(\"click\",()=>{
+    const v=variations[Number(btn.dataset.styleIndex)];
+    if(!v)return;
+    copyText([v.style,v.hook,v.caption,v.cta,v.hashtags].filter(Boolean).join(\"\\n\\n\")).then(()=>showToast(\"Gaya berhasil disalin ✓\"));
+  }));
+}
+
+const platformStrategy=$("#platformStrategy");if(platformStrategy)platformStrategy.textContent=result.platform_strategy||"Sesuaikan format, gaya hook, dan CTA dengan platform yang dipilih.";
   const platformTips=$("#platformTips");if(platformTips){const items=Array.isArray(result.platform_tips)&&result.platform_tips.length?result.platform_tips:["Sesuaikan pembuka dengan kebiasaan konsumsi platform.","Jaga format dan panjang copy tetap sesuai konteks platform.","Gunakan CTA yang mendorong aksi sesuai tujuan konten."];platformTips.innerHTML=items.slice(0,4).map(x=>"<li>"+escapeHtml(x)+"</li>").join("");}
   const visualText=$("#visualText");if(visualText)visualText.textContent=result.visual_text||m.visual;
   const videoCard=$("#videoStrategyCard"),photoCard=$("#photoStrategyCard");

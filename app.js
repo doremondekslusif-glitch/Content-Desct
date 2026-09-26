@@ -160,7 +160,9 @@ Konteks tambahan: "+ctx:d.caption;
     $("#score").textContent="8.2"; $("#scoreBar").style.width="82%";
     $("#scoreText").textContent=goalText[state.goal]+" Upload foto atau video untuk analisis AI yang sebenarnya.";
     $("#results").hidden=false; showStep(3); return;
-  }
+async function copyText(text){try{await navigator.clipboard.writeText(text);showToast("Berhasil disalin ✓")}catch(error){showToast("Gagal menyalin, coba lagi.")}}
+$(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{await copyText($("#"+btn.dataset.copy).textContent)}));
+$("#copyAllBtn").addEventListener("click",async()=>{const sections=[["Pilihan Hook",$("#hookOptions").textContent],["Analisis media",$("#mediaAnalysis").textContent],["Hook",$("#hook").textContent],["Caption",$("#caption").textContent],["Hashtag",$("#hashtags").textContent],["Ide teks visual",$("#visualText").textContent],["CTA",$("#cta").textContent],["Ide konten berikutnya",$("#contentIdeas").textContent],["Saran optimasi",$("#tips").textContent]];await copyText(sections.map(([title,value])=>title+"\n"+value.trim()).join("\n\n"))});
   setGenerating(true);
   try{
     const media=await buildMediaPayload();

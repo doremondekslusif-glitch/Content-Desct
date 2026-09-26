@@ -30,18 +30,18 @@ function showToast(msg){
   clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove("show"),1600);
 }
 function showStep(step){
-  $$$(".step").forEach(x=>x.classList.toggle("active",x.dataset.step===String(step)));
+  $(".step").forEach(x=>x.classList.toggle("active",x.dataset.step===String(step)));
   const panels={1:"#platformPanel",2:"#contentPanel",3:"#results"};
   Object.entries(panels).forEach(([n,sel])=>{const el=$(sel);if(el)el.hidden=Number(n)!==step});
   const target=$(panels[step]);if(target&&step>1)target.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 function bindChoices(selector,key,datasetKey){
-  $$$(selector).forEach(btn=>btn.addEventListener("click",()=>{
+  $(selector).forEach(btn=>btn.addEventListener("click",()=>{
     const value=btn.dataset[datasetKey];
     if(value==null)return;
     state[key]=value;
-    $$$(selector).forEach(x=>x.classList.toggle("selected",x===btn));
+    $(selector).forEach(x=>x.classList.toggle("selected",x===btn));
   }));
 }
 
@@ -49,15 +49,15 @@ bindChoices(".platform","platform","platform");
 bindChoices(".focus","focus","focus");
 bindChoices(".goal","goal","goal");
 
-$$$(".option").forEach(btn=>btn.addEventListener("click",()=>{
+$(".option").forEach(btn=>btn.addEventListener("click",()=>{
   const key=btn.dataset.audience!==undefined?"audience":"tone";
   const value=btn.dataset[key];
   if(value==null)return;
   state[key]=value;
-  $$$(".option").filter(x=>x.dataset[key]!==undefined).forEach(x=>x.classList.toggle("selected",x===btn));
+  $(".option").filter(x=>x.dataset[key]!==undefined).forEach(x=>x.classList.toggle("selected",x===btn));
 }));
 
-$$$(".platform").forEach(btn=>btn.addEventListener("click",()=>{
+$(".platform").forEach(btn=>btn.addEventListener("click",()=>{
   const note=$("#platformNote");if(note)note.textContent=platformNotes[state.platform]||"";
 }));
 
@@ -224,7 +224,7 @@ function renderAiResult(result){
     const n=document.createElement("span");n.className="hook-number";n.textContent=(i+1)+".";
     const t=document.createElement("span");t.className="hook-copy";t.textContent=hook;
     row.append(n,t);
-    row.addEventListener("click",()=>{state.selectedHook=hook;$$$(".hook-option").forEach(x=>x.classList.toggle("selected",x===row));$("#hook").textContent=hook;showToast("Hook dipilih ✓")});
+    row.addEventListener("click",()=>{state.selectedHook=hook;$(".hook-option").forEach(x=>x.classList.toggle("selected",x===row));$("#hook").textContent=hook;showToast("Hook dipilih ✓")});
     hookBox.appendChild(row);
   });
   const ideas=Array.isArray(result.content_ideas)&&result.content_ideas.length?result.content_ideas:["Buat postingan yang menonjolkan manfaat utama.","Tunjukkan cara penggunaan dalam kehidupan sehari-hari.","Buat perbandingan sebelum dan sesudah menggunakan produk.","Jawab pertanyaan yang paling sering ditanyakan audiens.","Buat versi video pendek dari konten ini."];

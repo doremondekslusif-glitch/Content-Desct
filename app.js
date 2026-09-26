@@ -210,10 +210,10 @@ function renderAiResult(result){
   if(result.platform_strategy)insightParts.push("Strategi: "+result.platform_strategy);
   $("#mediaInsight").textContent=insightParts.join("\\n\\n")||"AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
   const analysisParts=[];
-  if(result.media_analysis)analysisParts.push(result.media_analysis);
-  if(strengths.length)analysisParts.push("Kekuatan visual:\\n• "+strengths.join("\\n• "));
-  if(weaknesses.length)analysisParts.push("Yang bisa diperbaiki:\\n• "+weaknesses.join("\\n• "));
-  $("#mediaAnalysis").textContent=analysisParts.join("\\n\\n")||m.analysis;
+  if(result.media_analysis)analysisParts.push("<section><h4>Analisis utama</h4><p>"+escapeHtml(result.media_analysis)+"</p></section>");
+  if(strengths.length)analysisParts.push("<section><h4>Kekuatan visual</h4><ul>"+strengths.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
+  if(weaknesses.length)analysisParts.push("<section><h4>Yang bisa diperbaiki</h4><ul>"+weaknesses.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
+  $("#mediaAnalysis").innerHTML=analysisParts.join("")||"<p>"+escapeHtml(m.analysis)+"</p>";
   $("#visualText").textContent=result.visual_text||m.visual;
   $("#hook").textContent=result.hook||d.hook;
   $("#caption").innerHTML=formatText(result.caption||d.caption);

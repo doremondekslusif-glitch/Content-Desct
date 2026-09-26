@@ -22,379 +22,77 @@ const data={
 const $=s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
 
-function safe(fn){
-  try{fn()}catch(error){console.error("Content Desct:",error);showToast("Terjadi kesalahan pada halaman.")}}
-function showToast(msg){
-  const t=$("#toast");if(!t)return;
-  t.textContent=msg;t.classList.add("show");
-  clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove("show"),1600);
-}
+function safe(fn){try{fn()}catch(error){console.error("Content Desct:",error);showToast("Terjadi kesalahan pada halaman.")}}
+function showToast(msg){const t=$("#toast");if(!t)return;t.textContent=msg;t.classList.add("show");clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove("show"),1600)}
 function showStep(step){
   $$(".step").forEach(x=>x.classList.toggle("active",x.dataset.step===String(step)));
   const panels={1:"#platformPanel",2:"#contentPanel",3:"#results"};
   Object.entries(panels).forEach(([n,sel])=>{const el=$(sel);if(el)el.hidden=Number(n)!==step});
   const target=$(panels[step]);if(target&&step>1)target.scrollIntoView({behavior:"smooth",block:"start"});
 }
-
-function bindChoices(selector,key,datasetKey){
-  $$(selector).forEach(btn=>btn.addEventListener("click",()=>{
-    const value=btn.dataset[datasetKey];
-    if(value==null)return;
-    state[key]=value;
-    $$(selector).forEach(x=>x.classList.toggle("selected",x===btn));
-  }));
-}
-
-bindChoices(".platform","platform","platform");
-bindChoices(".focus","focus","focus");
-bindChoices(".goal","goal","goal");
-
-$$(".option").forEach(btn=>btn.addEventListener("click",()=>{
-  const key=btn.dataset.audience!==undefined?"audience":"tone";
-  const value=btn.dataset[key];
-  if(value==null)return;
-  state[key]=value;
-  $$(".option").filter(x=>x.dataset[key]!==undefined).forEach(x=>x.classList.toggle("selected",x===btn));
-}));
-
-$$(".platform").forEach(btn=>btn.addEventListener("click",()=>{
-  const note=$("#platformNote");if(note)note.textContent=platformNotes[state.platform]||"";
-}));
-
-$("#nextToContent")?.addEventListener("click",()=>showStep(2));
-$("#backToPlatform")?.addEventListener("click",()=>showStep(1));
-
-function addFiles(files){
-  const valid=files.filter(f=>f&&((f.type||"").startsWith("image/")||(f.type||"").startsWith("video/")));
-  const remaining=Math.max(0,5-state.files.length);
-  const unique=valid.filter(f=>!state.files.some(x=>x.name===f.name&&x.size===f.size&&x.lastModified===f.lastModified));
-  const accepted=unique.slice(0,remaining);
-  state.files=[...state.files,...accepted];
-  renderPreviews();
-  if(accepted.length)showToast(accepted.length+" media ditambahkan ✓");
-  if(unique.length>accepted.length)showToast("Maksimal 5 media dan file duplikat diabaikan.");
-  if(valid.length<files.length)showToast("Hanya foto dan video yang dapat digunakan.");
-  if($("#mediaInput"))$("#mediaInput").value="";
-}
-function renderPreviews(){
-  const list=$("#previewList");if(!list)return;
-  state.previewUrls.forEach(url=>URL.revokeObjectURL(url));
-  state.previewUrls=[];
-  list.innerHTML="";
-  state.files.forEach((file,i)=>{
-    const wrap=document.createElement("div");wrap.className="preview";
-    const url=URL.createObjectURL(file);
-    state.previewUrls.push(url);
-    if(file.type.startsWith("video/")){
-      const v=document.createElement("video");v.src=url;v.muted=true;v.playsInline=true;v.controls=true;v.preload="metadata";wrap.appendChild(v);
-    }else{
-      const img=document.createElement("img");img.src=url;img.alt=file.name||"Preview";wrap.appendChild(img);
-    }
-    const b=document.createElement("button");b.type="button";b.className="remove";b.setAttribute("aria-label","Hapus "+(file.name||"media"));
-    b.textContent="×";
-    b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();state.files.splice(i,1);renderPreviews()});
-    wrap.appendChild(b);list.appendChild(wrap);
-  });
-}
+function bindChoices(selector,key,datasetKey){$$(selector).forEach(btn=>btn.addEventListener("click",()=>{const value=btn.dataset[datasetKey];if(value==null)return;state[key]=value;$$(selector).forEach(x=>x.classList.toggle("selected",x===btn))}))}
+bindChoices(".platform","platform","platform");bindChoices(".focus","focus","focus");bindChoices(".goal","goal","goal");
+$$(".option").forEach(btn=>btn.addEventListener("click",()=>{const key=btn.dataset.audience!==undefined?"audience":"tone";const value=btn.dataset[key];if(value==null)return;state[key]=value;$$(".option").filter(x=>x.dataset[key]!==undefined).forEach(x=>x.classList.toggle("selected",x===btn))}));
+$$(".platform").forEach(btn=>btn.addEventListener("click",()=>{const note=$("#platformNote");if(note)note.textContent=platformNotes[state.platform]||""}));
+$("#nextToContent")?.addEventListener("click",()=>showStep(2));$("#backToPlatform")?.addEventListener("click",()=>showStep(1));
+function addFiles(files){const valid=files.filter(f=>f&&((f.type||"").startsWith("image/")||(f.type||"").startsWith("video/")));const remaining=Math.max(0,5-state.files.length);const unique=valid.filter(f=>!state.files.some(x=>x.name===f.name&&x.size===f.size&&x.lastModified===f.lastModified));const accepted=unique.slice(0,remaining);state.files=[...state.files,...accepted];renderPreviews();if(accepted.length)showToast(accepted.length+" media ditambahkan ✓");if(unique.length>accepted.length)showToast("Maksimal 5 media dan file duplikat diabaikan.");if(valid.length<files.length)showToast("Hanya foto dan video yang dapat digunakan.");if($("#mediaInput"))$("#mediaInput").value=""}
+function renderPreviews(){const list=$("#previewList");if(!list)return;state.previewUrls.forEach(url=>URL.revokeObjectURL(url));state.previewUrls=[];list.innerHTML="";state.files.forEach((file,i)=>{const wrap=document.createElement("div");wrap.className="preview";const url=URL.createObjectURL(file);state.previewUrls.push(url);if(file.type.startsWith("video/")){const v=document.createElement("video");v.src=url;v.muted=true;v.playsInline=true;v.controls=true;v.preload="metadata";wrap.appendChild(v)}else{const img=document.createElement("img");img.src=url;img.alt=file.name||"Preview";wrap.appendChild(img)}const b=document.createElement("button");b.type="button";b.className="remove";b.setAttribute("aria-label","Hapus "+(file.name||"media"));b.textContent="×";b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();state.files.splice(i,1);renderPreviews()});wrap.appendChild(b);list.appendChild(wrap)})}
 $("#mediaInput")?.addEventListener("change",e=>addFiles(Array.from(e.target.files||[])));
-const zone=$("#uploadZone");
-if(zone){
-  ["dragenter","dragover"].forEach(type=>zone.addEventListener(type,e=>{e.preventDefault();zone.classList.add("dragging")}));
-  ["dragleave","drop"].forEach(type=>zone.addEventListener(type,e=>{e.preventDefault();zone.classList.remove("dragging")}));
-  zone.addEventListener("drop",e=>addFiles(Array.from(e.dataTransfer.files||[])));
-}
-
-const goalText={
-  Jangkauan:"Buat pembuka yang kuat dan mudah ditemukan.",
-  Engagement:"Dorong percakapan dan interaksi.",
-  Penjualan:"Fokus pada manfaat dan alasan membeli.",
-  Followers:"Bangun alasan untuk mengikuti akun.",
-  Branding:"Perkuat karakter dan identitas brand.",
-  Edukasi:"Buat informasi mudah dipahami dan disimpan."
-};
-
-function getMediaProfile(){
-  const images=state.files.filter(f=>f.type.startsWith("image/")).length;
-  const videos=state.files.filter(f=>f.type.startsWith("video/")).length;
-  if(!state.files.length)return{label:"Belum ada media",insight:"Upload minimal satu foto atau video agar generator dapat menyesuaikan hasil.",analysis:"Belum ada media yang dapat dianalisis.",visual:"Tambahkan media terlebih dahulu."};
-  if(images&&videos)return{label:images+" foto + "+videos+" video",insight:"Konten campuran terdeteksi.",analysis:"Foto cocok untuk menonjolkan detail/produk, sedangkan video cocok untuk menunjukkan penggunaan, gerakan, atau proses.",visual:"Foto utama: fokus pada manfaat/objek. Video: tambahkan hook singkat di frame awal."};
-  if(images)return{label:images+" foto",insight:"Mode foto aktif. Rekomendasi difokuskan pada visual, komposisi, detail objek, dan teks.",analysis:"Mode foto terdeteksi. Gunakan visual utama sebagai fokus pesan, lalu sesuaikan caption dengan objek, suasana, dan tujuan posting.",visual:"Coba teks pendek 3–7 kata yang langsung menyampaikan manfaat utama."};
-  return{label:videos+" video",insight:"Mode video aktif. Rekomendasi difokuskan pada hook awal, retention, teks layar, dan CTA.",analysis:"Mode video terdeteksi. Prioritaskan frame pembuka yang kuat, pesan utama yang cepat dipahami, dan payoff.",visual:"Tambahkan hook 1 kalimat pada 1–2 detik pertama."};
-}
-
+const zone=$("#uploadZone");if(zone){["dragenter","dragover"].forEach(type=>zone.addEventListener(type,e=>{e.preventDefault();zone.classList.add("dragging")}));["dragleave","drop"].forEach(type=>zone.addEventListener(type,e=>{e.preventDefault();zone.classList.remove("dragging")}));zone.addEventListener("drop",e=>addFiles(Array.from(e.dataTransfer.files||[])))}
+const goalText={Jangkauan:"Buat pembuka yang kuat dan mudah ditemukan.",Engagement:"Dorong percakapan dan interaksi.",Penjualan:"Fokus pada manfaat dan alasan membeli.",Followers:"Bangun alasan untuk mengikuti akun.",Branding:"Perkuat karakter dan identitas brand.",Edukasi:"Buat informasi mudah dipahami dan disimpan."};
+function getMediaProfile(){const images=state.files.filter(f=>f.type.startsWith("image/")).length;const videos=state.files.filter(f=>f.type.startsWith("video/")).length;if(!state.files.length)return{label:"Belum ada media",insight:"Upload minimal satu foto atau video agar generator dapat menyesuaikan hasil.",analysis:"Belum ada media yang dapat dianalisis.",visual:"Tambahkan media terlebih dahulu."};if(images&&videos)return{label:images+" foto + "+videos+" video",insight:"Konten campuran terdeteksi.",analysis:"Foto cocok untuk menonjolkan detail/produk, sedangkan video cocok untuk menunjukkan penggunaan, gerakan, atau proses.",visual:"Foto utama: fokus pada manfaat/objek. Video: tambahkan hook singkat di frame awal."};if(images)return{label:images+" foto",insight:"Mode foto aktif. Rekomendasi difokuskan pada visual, komposisi, detail objek, dan teks.",analysis:"Mode foto terdeteksi. Gunakan visual utama sebagai fokus pesan, lalu sesuaikan caption dengan objek, suasana, dan tujuan posting.",visual:"Coba teks pendek 3–7 kata yang langsung menyampaikan manfaat utama."};return{label:videos+" video",insight:"Mode video aktif. Rekomendasi difokuskan pada hook awal, retention, teks layar, dan CTA.",analysis:"Mode video terdeteksi. Prioritaskan frame pembuka yang kuat, pesan utama yang cepat dipahami, dan payoff.",visual:"Tambahkan hook 1 kalimat pada 1–2 detik pertama."}}
 const ANALYZER_API_URL=window.CONTENT_DESCT_API_URL||localStorage.getItem("contentDesctApiUrl")||"https://content-desct.vercel.app/api/analyze";
-
-async function fileToDataUrl(file,maxSide=720,quality=.62){
-  if(!file.type.startsWith("image/"))return null;
-  return new Promise((resolve,reject)=>{
-    const img=new Image(),url=URL.createObjectURL(file);
-    img.onload=()=>{
-      const scale=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
-      const canvas=document.createElement("canvas");
-      canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
-      canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
-      const ctx=canvas.getContext("2d");
-      if(!ctx){URL.revokeObjectURL(url);reject(new Error("Browser tidak mendukung canvas."));return}
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
-      resolve(canvas.toDataURL("image/jpeg",quality));URL.revokeObjectURL(url);
-    };
-    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Gambar tidak dapat dibaca browser."))};
-    img.src=url;
-  });
-}
-
-async function videoToFrames(file,count=2){
-  return new Promise((resolve,reject)=>{
-    const video=document.createElement("video"),url=URL.createObjectURL(file);
-    let done=false;
-    const cleanup=()=>{URL.revokeObjectURL(url);video.remove()};
-    video.preload="metadata";video.muted=true;video.playsInline=true;
-    video.onloadedmetadata=async()=>{
-      try{
-        const duration=Number.isFinite(video.duration)?video.duration:0;
-        const times=duration>0?Array.from({length:count},(_,i)=>duration*(i+.5)/count):[0];
-        const frames=[];
-        for(const time of times){
-          video.currentTime=Math.min(time,Math.max(0,duration-.05));
-          await new Promise((res,rej)=>{
-            let settled=false;
-            const finish=(fn)=>{if(settled)return;settled=true;clearTimeout(timer);video.onseeked=null;video.onerror=null;fn()};
-            const timer=setTimeout(()=>finish(()=>rej(new Error("Frame video terlalu lama dibaca."))),7000);
-            video.onseeked=()=>finish(res);
-            video.onerror=()=>finish(()=>rej(new Error("Gagal membaca frame video.")));
-          });
-          const scale=Math.min(1,640/Math.max(video.videoWidth||1,video.videoHeight||1));
-          const canvas=document.createElement("canvas");
-          canvas.width=Math.max(1,Math.round((video.videoWidth||640)*scale));
-          canvas.height=Math.max(1,Math.round((video.videoHeight||360)*scale));
-          canvas.getContext("2d").drawImage(video,0,0,canvas.width,canvas.height);
-          frames.push(canvas.toDataURL("image/jpeg",.55));
-        }
-        done=true;cleanup();resolve(frames);
-      }catch(error){if(!done){cleanup();reject(error)}}
-    };
-    video.onerror=()=>{if(!done){cleanup();reject(new Error("Video tidak dapat dibaca browser."))}};
-    video.src=url;
-  });
-}
-
-async function buildMediaPayload(){
-  const media=[];
-  for(const file of state.files){
-    if(file.type.startsWith("image/")){
-      const data=await fileToDataUrl(file);if(data)media.push({type:"image",name:file.name,data});
-    }else if(file.type.startsWith("video/")){
-      const frames=await videoToFrames(file,2);
-      frames.forEach((data,index)=>media.push({type:"video_frame",name:file.name+" · frame "+(index+1),data}));
-    }
-  }
-  return media;
-}
-
-function setGenerating(value){
-  isGenerating=value;
-  const generateBtn=$("#generateBtn");
-  const regenerateBtn=$("#regenerateBtn");
-  if(generateBtn){
-    generateBtn.disabled=value;
-    generateBtn.innerHTML=value?"<span>◌</span> AI sedang menganalisis media...":"<span>✦</span> Analisis & Generate";
-  }
-  if(regenerateBtn){
-    regenerateBtn.disabled=value;
-    regenerateBtn.innerHTML=value?"<span>◌</span> Menganalisis...":"↻ Generate ulang";
-  }
-}
-
-function escapeHtml(text){
-  const el=document.createElement("div");el.textContent=String(text??"");return el.innerHTML;
-}
-function formatText(text){
-  return String(text??"").replace(/\r\n/g,"\n").replace(/\n{3,}/g,"\n\n").split("\n").map(line=>line.trim()?'<div>'+escapeHtml(line.trim())+'</div>':'<div class="text-gap"></div>').join("");
-}
+async function fileToDataUrl(file,maxSide=720,quality=.62){if(!file.type.startsWith("image/"))return null;return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const scale=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));const ctx=canvas.getContext("2d");if(!ctx){URL.revokeObjectURL(url);reject(new Error("Browser tidak mendukung canvas."));return}ctx.drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL("image/jpeg",quality));URL.revokeObjectURL(url)};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Gambar tidak dapat dibaca browser."))};img.src=url})}
+async function videoToFrames(file,count=2){return new Promise((resolve,reject)=>{const video=document.createElement("video"),url=URL.createObjectURL(file);let done=false;const cleanup=()=>{URL.revokeObjectURL(url);video.remove()};video.preload="metadata";video.muted=true;video.playsInline=true;video.onloadedmetadata=async()=>{try{const duration=Number.isFinite(video.duration)?video.duration:0;const times=duration>0?Array.from({length:count},(_,i)=>duration*(i+.5)/count):[0];const frames=[];for(const time of times){video.currentTime=Math.min(time,Math.max(0,duration-.05));await new Promise((res,rej)=>{let settled=false;const finish=(fn)=>{if(settled)return;settled=true;clearTimeout(timer);video.onseeked=null;video.onerror=null;fn()};const timer=setTimeout(()=>finish(()=>rej(new Error("Frame video terlalu lama dibaca."))),7000);video.onseeked=()=>finish(res);video.onerror=()=>finish(()=>rej(new Error("Gagal membaca frame video.")))});const scale=Math.min(1,640/Math.max(video.videoWidth||1,video.videoHeight||1));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round((video.videoWidth||640)*scale));canvas.height=Math.max(1,Math.round((video.videoHeight||360)*scale));canvas.getContext("2d").drawImage(video,0,0,canvas.width,canvas.height);frames.push(canvas.toDataURL("image/jpeg",.55))}done=true;cleanup();resolve(frames)}catch(error){if(!done){cleanup();reject(error)}}};video.onerror=()=>{if(!done){cleanup();reject(new Error("Video tidak dapat dibaca browser."))}};video.src=url})}
+async function buildMediaPayload(){const media=[];for(const file of state.files){if(file.type.startsWith("image/")){const data=await fileToDataUrl(file);if(data)media.push({type:"image",name:file.name,data})}else if(file.type.startsWith("video/")){const frames=await videoToFrames(file,2);frames.forEach((data,index)=>media.push({type:"video_frame",name:file.name+" · frame "+(index+1),data}))}}return media}
+function setGenerating(value){isGenerating=value;const generateBtn=$("#generateBtn"),regenerateBtn=$("#regenerateBtn");if(generateBtn){generateBtn.disabled=value;generateBtn.innerHTML=value?"<span>◌</span> AI sedang menganalisis media...":"<span>✦</span> Analisis & Generate"}if(regenerateBtn){regenerateBtn.disabled=value;regenerateBtn.innerHTML=value?"<span>◌</span> Menganalisis...":"↻ Generate ulang"}}
+function escapeHtml(text){const el=document.createElement("div");el.textContent=String(text??"");return el.innerHTML}
+function formatText(text){return String(text??"").replace(/\r\n/g,"\n").replace(/\n{3,}/g,"\n\n").split("\n").map(line=>line.trim()?'<div>'+escapeHtml(line.trim())+'</div>':'<div class="text-gap"></div>').join("")}
 
 function renderAiResult(result){
   const d=data[state.platform]||data.Instagram,m=getMediaProfile();
-  const hasVideo=state.files.some(f=>f.type.startsWith("video/"));
-  const hasImage=state.files.some(f=>f.type.startsWith("image/"));
-  const mode=hasVideo&&hasImage?"CAMPURAN":hasVideo?"VIDEO":"FOTO";
+  const hasVideo=state.files.some(f=>f.type.startsWith("video/"));const hasImage=state.files.some(f=>f.type.startsWith("image/"));const mode=hasVideo&&hasImage?"CAMPURAN":hasVideo?"VIDEO":"FOTO";
   const hooks=Array.isArray(result.hook_options)&&result.hook_options.length?result.hook_options:[result.hook||d.hook,"POV: ini mungkin yang sedang kamu cari.","Sederhana, tapi ternyata berguna setiap hari."];
-  const hookBox=$("#hookOptions");
-  if(hookBox){
-    hookBox.innerHTML="";
-    hooks.slice(0,5).forEach((hook,i)=>{
-      const row=document.createElement("button");row.type="button";row.className="hook-option"+(hook===state.selectedHook?" selected":"");
-      const n=document.createElement("span");n.className="hook-number";n.textContent=(i+1)+".";
-      const t=document.createElement("span");t.className="hook-copy";t.textContent=hook;
-      row.append(n,t);
-      row.addEventListener("click",()=>{state.selectedHook=hook;$$(".hook-option").forEach(x=>x.classList.toggle("selected",x===row));$("#hook").textContent=hook;showToast("Hook dipilih ✓")});
-      hookBox.appendChild(row);
-    });
-  }
+  const hookBox=$("#hookOptions");if(hookBox){hookBox.innerHTML="";hooks.slice(0,5).forEach((hook,i)=>{const row=document.createElement("button");row.type="button";row.className="hook-option"+(hook===state.selectedHook?" selected":"");const n=document.createElement("span");n.className="hook-number";n.textContent=(i+1)+".";const t=document.createElement("span");t.className="hook-copy";t.textContent=hook;row.append(n,t);row.addEventListener("click",()=>{state.selectedHook=hook;$$(".hook-option").forEach(x=>x.classList.toggle("selected",x===row));$("#hook").textContent=hook;showToast("Hook dipilih ✓")});hookBox.appendChild(row)})}
   const ideas=Array.isArray(result.content_ideas)&&result.content_ideas.length?result.content_ideas:["Buat postingan yang menonjolkan manfaat utama.","Tunjukkan cara penggunaan dalam kehidupan sehari-hari.","Buat perbandingan sebelum dan sesudah menggunakan produk.","Jawab pertanyaan yang paling sering ditanyakan audiens.","Buat versi video pendek dari konten ini."];
   const ideasBox=$("#contentIdeas");if(ideasBox)ideasBox.innerHTML=ideas.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
   const summary=$("#mediaSummary");if(summary)summary.textContent=m.label;
-  const strengths=Array.isArray(result.visual_strengths)?result.visual_strengths:[];
-  const weaknesses=Array.isArray(result.visual_weaknesses)?result.visual_weaknesses:[];
-  const insightParts=[];
-  if(result.visual_summary)insightParts.push("Ringkasan: "+result.visual_summary);
-  if(result.audience_fit)insightParts.push("Audiens: "+result.audience_fit);
-  if(result.platform_strategy)insightParts.push("Strategi: "+result.platform_strategy);
+  const strengths=Array.isArray(result.visual_strengths)?result.visual_strengths:[],weaknesses=Array.isArray(result.visual_weaknesses)?result.visual_weaknesses:[];
+  const insightParts=[];if(result.visual_summary)insightParts.push("Ringkasan: "+result.visual_summary);if(result.audience_fit)insightParts.push("Audiens: "+result.audience_fit);if(result.platform_strategy)insightParts.push("Strategi: "+result.platform_strategy);
   const insight=$("#mediaInsight");if(insight)insight.textContent=insightParts.join("\n\n")||"AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
-  const visualDetails=String(result.visual_details||"").trim();
-  const detailBox=$("#visualDetails");
-  if(detailBox){
-    const detailItems=visualDetails.split(/\\n|(?<=[.!?])\\s+|\\s*;\\s*/).map(x=>x.trim()).filter(Boolean).slice(0,8);
-    detailBox.innerHTML=detailItems.length
-      ? detailItems.map((x,i)=>"<div class=\"visual-detail\"><span class=\"visual-detail-number\">"+(i+1)+"</span><span>"+escapeHtml(x)+"</span></div>").join("")
-      : "<p>Detail visual belum tersedia.</p>";
-  }
-  const analysisParts=[];
-  if(result.media_analysis)analysisParts.push("<section><h4>Analisis utama</h4><p>"+escapeHtml(result.media_analysis)+"</p></section>");
-  if(strengths.length)analysisParts.push("<section><h4>Kekuatan visual</h4><ul>"+strengths.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
-  if(weaknesses.length)analysisParts.push("<section><h4>Yang bisa diperbaiki</h4><ul>"+weaknesses.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
+  const visualDetails=String(result.visual_details||"").trim(),detailBox=$("#visualDetails");
+  if(detailBox){const detailItems=visualDetails.split(/\n|(?<=[.!?])\s+|\s*;\s*/).map(x=>x.trim()).filter(Boolean).slice(0,8);detailBox.innerHTML=detailItems.length?detailItems.map((x,i)=>"<div class=\"visual-detail\"><span class=\"visual-detail-number\">"+(i+1)+"</span><span>"+escapeHtml(x)+"</span></div>").join(""):"<p>Detail visual belum tersedia.</p>"}
+  const analysisParts=[];if(result.media_analysis)analysisParts.push("<section><h4>Analisis utama</h4><p>"+escapeHtml(result.media_analysis)+"</p></section>");if(strengths.length)analysisParts.push("<section><h4>Kekuatan visual</h4><ul>"+strengths.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");if(weaknesses.length)analysisParts.push("<section><h4>Yang bisa diperbaiki</h4><ul>"+weaknesses.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
   const analysis=$("#mediaAnalysis");if(analysis)analysis.innerHTML=analysisParts.join("")||"<p>"+escapeHtml(m.analysis)+"</p>";
   const styleVariations=$("#styleVariations");
-if(styleVariations){
-  const variations=Array.isArray(result.style_variations)&&result.style_variations.length?result.style_variations:[];
-  styleVariations.innerHTML=variations.slice(0,3).map((v,i)=>{
-    const style=String(v&&v.style||["Natural & santai","Persuasif","Storytelling"][i]||"Gaya alternatif");
-    return "<article class=\"style-variation\"><div class=\"style-variation-head\"><strong>"+escapeHtml(style)+"</strong><button type=\"button\" class=\"copy-btn style-copy\" data-style-index=\""+i+"\">Salin</button></div><div class=\"style-field\"><span>Hook</span><p>"+escapeHtml(String(v&&v.hook||""))+"</p></div><div class=\"style-field\"><span>Caption</span><p>"+escapeHtml(String(v&&v.caption||""))+"</p></div><div class=\"style-field\"><span>CTA</span><p>"+escapeHtml(String(v&&v.cta||""))+"</p></div><div class=\"style-field\"><span>Hashtag</span><p>"+escapeHtml(String(v&&v.hashtags||""))+"</p></div></article>";
-  }).join("");
-  if(!variations.length)styleVariations.innerHTML="<p>Variasi gaya belum tersedia.</p>";
-  $(".style-copy").forEach(btn=>btn.addEventListener("click",()=>{
-    const v=variations[Number(btn.dataset.styleIndex)];
-    if(!v)return;
-    copyText([v.style,v.hook,v.caption,v.cta,v.hashtags].filter(Boolean).join(\"\\n\\n\")).then(()=>showToast(\"Gaya berhasil disalin ✓\"));
-  }));
-}
-
-const platformStrategy=$("#platformStrategy");if(platformStrategy)platformStrategy.textContent=result.platform_strategy||"Sesuaikan format, gaya hook, dan CTA dengan platform yang dipilih.";
-  const platformTips=$("#platformTips");if(platformTips){const items=Array.isArray(result.platform_tips)&&result.platform_tips.length?result.platform_tips:["Sesuaikan pembuka dengan kebiasaan konsumsi platform.","Jaga format dan panjang copy tetap sesuai konteks platform.","Gunakan CTA yang mendorong aksi sesuai tujuan konten."];platformTips.innerHTML=items.slice(0,4).map(x=>"<li>"+escapeHtml(x)+"</li>").join("");}
+  if(styleVariations){
+    const variations=Array.isArray(result.style_variations)&&result.style_variations.length?result.style_variations:[];
+    styleVariations.innerHTML=variations.slice(0,3).map((v,i)=>{const style=String(v&&v.style||["Natural & santai","Persuasif","Storytelling"][i]||"Gaya alternatif");return "<article class=\"style-variation\"><div class=\"style-variation-head\"><strong>"+escapeHtml(style)+"</strong><button type=\"button\" class=\"copy-btn style-copy\" data-style-index=\""+i+"\">Salin</button></div><div class=\"style-field\"><span>Hook</span><p>"+escapeHtml(String(v&&v.hook||""))+"</p></div><div class=\"style-field\"><span>Caption</span><p>"+escapeHtml(String(v&&v.caption||""))+"</p></div><div class=\"style-field\"><span>CTA</span><p>"+escapeHtml(String(v&&v.cta||""))+"</p></div><div class=\"style-field\"><span>Hashtag</span><p>"+escapeHtml(String(v&&v.hashtags||""))+"</p></div></article>"}).join("");
+    if(!variations.length)styleVariations.innerHTML="<p>Variasi gaya belum tersedia.</p>";
+    $(".style-copy").forEach(btn=>btn.addEventListener("click",()=>{const v=variations[Number(btn.dataset.styleIndex)];if(!v)return;copyText([v.style,v.hook,v.caption,v.cta,v.hashtags].filter(Boolean).join("\n\n")).then(()=>showToast("Gaya berhasil disalin ✓"))}));
+  }
+  const platformStrategy=$("#platformStrategy");if(platformStrategy)platformStrategy.textContent=result.platform_strategy||"Sesuaikan format, gaya hook, dan CTA dengan platform yang dipilih.";
+  const platformTips=$("#platformTips");if(platformTips){const items=Array.isArray(result.platform_tips)&&result.platform_tips.length?result.platform_tips:["Sesuaikan pembuka dengan kebiasaan konsumsi platform.","Jaga format dan panjang copy tetap sesuai konteks platform.","Gunakan CTA yang mendorong aksi sesuai tujuan konten."];platformTips.innerHTML=items.slice(0,4).map(x=>"<li>"+escapeHtml(x)+"</li>").join("")}
   const visualText=$("#visualText");if(visualText)visualText.textContent=result.visual_text||m.visual;
-  const videoCard=$("#videoStrategyCard"),photoCard=$("#photoStrategyCard");
-  if(videoCard)videoCard.hidden=mode==="FOTO";
-  if(photoCard)photoCard.hidden=mode==="VIDEO";
-  const videoHook=$("#videoHook"),voiceover=$("#voiceover"),photoStrategy=$("#photoStrategy");
-  if(videoHook)videoHook.textContent=result.video_hook||result.hook||"Gunakan kalimat paling menarik pada 1–3 detik pertama.";
-  if(voiceover)voiceover.textContent=result.voiceover||result.video_hook||"Narasi singkat yang menjelaskan apa yang sedang dilihat penonton.";
-  const onScreenText=$("#onScreenText");
-  if(onScreenText){
-    const screenItems=Array.isArray(result.on_screen_text)&&result.on_screen_text.length?result.on_screen_text:["Hook singkat","Manfaat utama","Bukti atau penggunaan","CTA"];
-    onScreenText.innerHTML=screenItems.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
-  }
-  const videoStructure=$("#videoStructure");
-  if(videoStructure){
-    const structure=Array.isArray(result.video_structure)&&result.video_structure.length?result.video_structure:["Opening: tampilkan bagian paling menarik.","Context: jelaskan inti konten dengan cepat.","Payoff: tunjukkan manfaat atau hasil yang terlihat.","Closing: arahkan penonton ke CTA."];
-    videoStructure.innerHTML=structure.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
-  }
+  const videoCard=$("#videoStrategyCard"),photoCard=$("#photoStrategyCard");if(videoCard)videoCard.hidden=mode==="FOTO";if(photoCard)photoCard.hidden=mode==="VIDEO";
+  const videoHook=$("#videoHook"),voiceover=$("#voiceover"),photoStrategy=$("#photoStrategy");if(videoHook)videoHook.textContent=result.video_hook||result.hook||"Gunakan kalimat paling menarik pada 1–3 detik pertama.";if(voiceover)voiceover.textContent=result.voiceover||result.video_hook||"Narasi singkat yang menjelaskan apa yang sedang dilihat penonton.";
+  const onScreenText=$("#onScreenText");if(onScreenText){const screenItems=Array.isArray(result.on_screen_text)&&result.on_screen_text.length?result.on_screen_text:["Hook singkat","Manfaat utama","Bukti atau penggunaan","CTA"];onScreenText.innerHTML=screenItems.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")}
+  const videoStructure=$("#videoStructure");if(videoStructure){const structure=Array.isArray(result.video_structure)&&result.video_structure.length?result.video_structure:["Opening: tampilkan bagian paling menarik.","Context: jelaskan inti konten dengan cepat.","Payoff: tunjukkan manfaat atau hasil yang terlihat.","Closing: arahkan penonton ke CTA."];videoStructure.innerHTML=structure.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")}
   if(photoStrategy)photoStrategy.textContent=result.photo_strategy||"Gunakan foto utama dengan subjek paling jelas, crop yang tidak terlalu padat, dan teks overlay singkat bila membantu pesan.";
-  const hook=$("#hook");if(hook)hook.textContent=result.hook||d.hook;
-  const hookCard=$("#hookCardTitle"),hookHelp=$("#hookHelp");
-  if(hookCard)hookCard.textContent=mode==="VIDEO"?"🎬 Hook Video":mode==="CAMPURAN"?"🎬 Hook Utama":"🔥 Hook Caption";
-  if(hookHelp)hookHelp.textContent=result.hook_usage||(mode==="VIDEO"?"Gunakan di voice-over atau teks pada 1–3 detik pertama video.":"Gunakan sebagai kalimat pertama caption.");
-  const captionCard=$("#captionCardTitle");if(captionCard)captionCard.textContent=mode==="VIDEO"?"✍️ Caption singkat":"✍️ Caption";
-  const caption=$("#caption");if(caption)caption.innerHTML=formatText(result.caption||d.caption);
-  const hashtags=$("#hashtags");if(hashtags)hashtags.textContent=result.hashtags||d.hashtags;
-  const cta=$("#cta");if(cta)cta.textContent=result.cta||d.cta;
-  const tips=Array.isArray(result.tips)&&result.tips.length?result.tips:d.tips;
-  const tipsBox=$("#tips");if(tipsBox)tipsBox.innerHTML=tips.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
-  const score=Number(result.score),safeScore=Number.isFinite(score)?Math.max(0,Math.min(10,score)):8.9;
-  const scoreEl=$("#score"),bar=$("#scoreBar");if(scoreEl)scoreEl.textContent=safeScore.toFixed(1);if(bar)bar.style.width=(safeScore*10)+"%";
-  const breakdown=result.score_breakdown||{};
-  const breakdownText=[["Visual",breakdown.visual],["Pesan",breakdown.message],["Platform",breakdown.platform],["Audiens",breakdown.audience]].filter(x=>Number.isFinite(Number(x[1]))).map(x=>x[0]+" "+Number(x[1]).toFixed(1)).join(" · ");
-  const scoreText=$("#scoreText");if(scoreText)scoreText.textContent=(result.score_reason||goalText[state.goal])+(breakdownText?" | "+breakdownText:"");
-  showStep(3);
+  const hook=$("#hook");if(hook)hook.textContent=result.hook||d.hook;const hookCard=$("#hookCardTitle"),hookHelp=$("#hookHelp");if(hookCard)hookCard.textContent=mode==="VIDEO"?"🎬 Hook Video":mode==="CAMPURAN"?"🎬 Hook Utama":"🔥 Hook Caption";if(hookHelp)hookHelp.textContent=result.hook_usage||(mode==="VIDEO"?"Gunakan di voice-over atau teks pada 1–3 detik pertama video.":"Gunakan sebagai kalimat pertama caption.");const captionCard=$("#captionCardTitle");if(captionCard)captionCard.textContent=mode==="VIDEO"?"✍️ Caption singkat":"✍️ Caption";const caption=$("#caption");if(caption)caption.innerHTML=formatText(result.caption||d.caption);const hashtags=$("#hashtags");if(hashtags)hashtags.textContent=result.hashtags||d.hashtags;const cta=$("#cta");if(cta)cta.textContent=result.cta||d.cta;const tips=Array.isArray(result.tips)&&result.tips.length?result.tips:d.tips;const tipsBox=$("#tips");if(tipsBox)tipsBox.innerHTML=tips.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
+  const score=Number(result.score),safeScore=Number.isFinite(score)?Math.max(0,Math.min(10,score)):8.9;const scoreEl=$("#score"),bar=$("#scoreBar");if(scoreEl)scoreEl.textContent=safeScore.toFixed(1);if(bar)bar.style.width=(safeScore*10)+"%";const breakdown=result.score_breakdown||{};const breakdownText=[["Visual",breakdown.visual],["Pesan",breakdown.message],["Platform",breakdown.platform],["Audiens",breakdown.audience]].filter(x=>Number.isFinite(Number(x[1]))).map(x=>x[0]+" "+Number(x[1]).toFixed(1)).join(" · ");const scoreText=$("#scoreText");if(scoreText)scoreText.textContent=(result.score_reason||goalText[state.goal])+(breakdownText?" | "+breakdownText:"");showStep(3);
 }
 
 async function generate(){
-  if(isGenerating)return;
-  const d=data[state.platform]||data.Instagram,m=getMediaProfile();
-  setGenerating(true);
+  if(isGenerating)return;const d=data[state.platform]||data.Instagram,m=getMediaProfile();setGenerating(true);
   try{
-    if(!state.files.length){
-      $("#mediaSummary").textContent=m.label;$("#mediaInsight").textContent=m.insight;
-      $("#mediaAnalysis").textContent=m.analysis;$("#visualText").textContent=m.visual;
-      $("#hook").textContent=d.hook;$("#caption").innerHTML=formatText(d.caption);
-      $("#hashtags").textContent=d.hashtags;$("#cta").textContent=d.cta;
-      $("#tips").innerHTML=d.tips.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
-      $("#score").textContent="8.2";$("#scoreBar").style.width="82%";
-      $("#scoreText").textContent=goalText[state.goal]+" Upload foto atau video untuk analisis AI yang sebenarnya.";
-      renderAiResult({hook:d.hook,caption:d.caption,hashtags:d.hashtags,cta:d.cta,tips:d.tips,content_ideas:[]});
-      return;
-    }
-    const media=await buildMediaPayload();
-    const contentMode=state.files.some(f=>f.type.startsWith("video/"))?(state.files.some(f=>f.type.startsWith("image/"))?"CAMPURAN":"VIDEO"):"FOTO";
-    const requestBody=JSON.stringify({platform:state.platform,goal:state.goal,context:state.focus,audience:state.audience,tone:state.tone,contentMode,media});
-    if(new Blob([requestBody]).size>4*1024*1024)throw new Error("Media terlalu besar untuk dikirim. Kurangi jumlah atau ukuran file.");
-    const controller=new AbortController();
-    const requestTimer=setTimeout(()=>controller.abort(),55000);
-    let response;
-    try{
-      response=await fetch(ANALYZER_API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:requestBody,signal:controller.signal});
-    }finally{
-      clearTimeout(requestTimer);
-    }
-    const raw=await response.text();let result={};
-    try{result=JSON.parse(raw)}catch{}
-    if(!response.ok)throw new Error(result.error||"Server AI mengembalikan error.");
-    renderAiResult(result);
-  }catch(error){
-    if(error&&error.name==="AbortError")error=new Error("Analisis AI melewati batas waktu. Coba Generate ulang.");
-    console.error(error);
-    const fallback={
-      score:7.8,
-      score_reason:"AI backend sedang tidak tersedia, jadi hasil sementara dibuat dari pilihan konten dan media yang kamu unggah.",
-      media_analysis:m.analysis,
-      hook:d.hook,
-      hook_options:[d.hook,"POV: kamu baru sadar ini ternyata berguna setiap hari.","Sederhana, praktis, dan layak dicoba."],
-      caption:d.caption,
-      hashtags:d.hashtags,
-      cta:d.cta,
-      visual_text:m.visual,
-      content_ideas:["Tunjukkan manfaat utama dari konten ini.","Buat versi before-after.","Tampilkan cara penggunaan sehari-hari.","Jawab pertanyaan yang sering muncul dari audiens.","Buat versi video pendek dengan hook yang lebih cepat."],
-      tips:d.tips,
-      video_hook:d.hook,
-      voiceover:"",
-      video_structure:[],
-      on_screen_text:[],
-      photo_strategy:"Fokuskan foto pada subjek utama dan gunakan teks overlay singkat bila diperlukan."
-    };
-    renderAiResult(fallback);
-    $("#mediaInsight").textContent="AI belum dapat dihubungi ("+(error.message||"server 503")+"). Hasil sementara tetap ditampilkan agar kontenmu tidak hilang.";
-    showToast("AI gagal, hasil sementara ditampilkan.");
+    if(!state.files.length){$("#mediaSummary").textContent=m.label;$("#mediaInsight").textContent=m.insight;$("#mediaAnalysis").textContent=m.analysis;$("#visualText").textContent=m.visual;$("#hook").textContent=d.hook;$("#caption").innerHTML=formatText(d.caption);$("#hashtags").textContent=d.hashtags;$("#cta").textContent=d.cta;$("#tips").innerHTML=d.tips.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");$("#score").textContent="8.2";$("#scoreBar").style.width="82%";$("#scoreText").textContent=goalText[state.goal]+" Upload foto atau video untuk analisis AI yang sebenarnya.";renderAiResult({hook:d.hook,caption:d.caption,hashtags:d.hashtags,cta:d.cta,tips:d.tips,content_ideas:[]});return}
+    const media=await buildMediaPayload();const contentMode=state.files.some(f=>f.type.startsWith("video/"))?(state.files.some(f=>f.type.startsWith("image/"))?"CAMPURAN":"VIDEO"):"FOTO";const requestBody=JSON.stringify({platform:state.platform,goal:state.goal,context:state.focus,audience:state.audience,tone:state.tone,contentMode,media});if(new Blob([requestBody]).size>4*1024*1024)throw new Error("Media terlalu besar untuk dikirim. Kurangi jumlah atau ukuran file.");const controller=new AbortController();const requestTimer=setTimeout(()=>controller.abort(),55000);let response;try{response=await fetch(ANALYZER_API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:requestBody,signal:controller.signal})}finally{clearTimeout(requestTimer)}const raw=await response.text();let result={};try{result=JSON.parse(raw)}catch{}if(!response.ok)throw new Error(result.error||"Server AI mengembalikan error.");renderAiResult(result);
+  }catch(error){if(error&&error.name==="AbortError")error=new Error("Analisis AI melewati batas waktu. Coba Generate ulang.");console.error(error);const fallback={score:7.8,score_reason:"AI backend sedang tidak tersedia, jadi hasil sementara dibuat dari pilihan konten dan media yang kamu unggah.",media_analysis:m.analysis,hook:d.hook,hook_options:[d.hook,"POV: kamu baru sadar ini ternyata berguna setiap hari.","Sederhana, praktis, dan layak dicoba."],caption:d.caption,hashtags:d.hashtags,cta:d.cta,visual_text:m.visual,content_ideas:["Tunjukkan manfaat utama dari konten ini.","Buat versi before-after.","Tampilkan cara penggunaan sehari-hari.","Jawab pertanyaan yang sering muncul dari audiens.","Buat versi video pendek dengan hook yang lebih cepat."],tips:d.tips,video_hook:d.hook,voiceover:"",video_structure:[],on_screen_text:[],photo_strategy:"Fokuskan foto pada subjek utama dan gunakan teks overlay singkat bila diperlukan."};renderAiResult(fallback);$("#mediaInsight").textContent="AI belum dapat dihubungi ("+(error.message||"server 503")+"). Hasil sementara tetap ditampilkan agar kontenmu tidak hilang.";showToast("AI gagal, hasil sementara ditampilkan.")
   }finally{setGenerating(false)}
 }
-
-async function copyText(text){
-  try{
-    if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(text);
-    else{const area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.focus();area.select();document.execCommand("copy");area.remove()}
-    showToast("Berhasil disalin ✓");
-  }catch(error){showToast("Gagal menyalin, coba lagi.")}
-}
-$$(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{
-  const text=$( "#"+btn.dataset.copy)?.innerText||"";
-  if(!text.trim())return showToast("Belum ada teks untuk disalin.");
-  const original=btn.textContent;
-  await copyText(text);
-  btn.textContent="Tersalin ✓";
-  clearTimeout(btn._copyTimer);
-  btn._copyTimer=setTimeout(()=>{btn.textContent=original},1400);
-}));
-$("#copyAllBtn")?.addEventListener("click",()=>{
-  const sections=[
-    ["Pilihan Hook",$("#hookOptions")?.innerText],["Analisis media",$("#mediaAnalysis")?.innerText],["Hook",$("#hook")?.innerText],
-    ["Caption",$("#caption")?.innerText],["Hashtag",$("#hashtags")?.innerText],["Ide teks visual",$("#visualText")?.innerText],
-    ["CTA",$("#cta")?.innerText],["Ide konten berikutnya",$("#contentIdeas")?.innerText],["Saran optimasi",$("#tips")?.innerText]
-  ];
-  copyText(sections.map(([title,value])=>title+"\n"+(value||"").trim()).join("\n\n"));
-});
-
-$("#generateBtn")?.addEventListener("click",generate);
-$("#regenerateBtn")?.addEventListener("click",generate);
-$("#backToContent")?.addEventListener("click",()=>showStep(2));
-
-showStep(1);
-
-
+async function copyText(text){try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(text);else{const area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.focus();area.select();document.execCommand("copy");area.remove()}showToast("Berhasil disalin ✓")}catch(error){showToast("Gagal menyalin, coba lagi.")}}
+$$(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{const text=$( "#"+btn.dataset.copy)?.innerText||"";if(!text.trim())return showToast("Belum ada teks untuk disalin.");const original=btn.textContent;await copyText(text);btn.textContent="Tersalin ✓";clearTimeout(btn._copyTimer);btn._copyTimer=setTimeout(()=>{btn.textContent=original},1400)}));
+$("#copyAllBtn")?.addEventListener("click",()=>{const sections=[["Pilihan Hook",$("#hookOptions")?.innerText],["Analisis media",$("#mediaAnalysis")?.innerText],["Hook",$("#hook")?.innerText],["Caption",$("#caption")?.innerText],["Hashtag",$("#hashtags")?.innerText],["Ide teks visual",$("#visualText")?.innerText],["CTA",$("#cta")?.innerText],["Ide konten berikutnya",$("#contentIdeas")?.innerText],["Saran optimasi",$("#tips")?.innerText]];copyText(sections.map(([title,value])=>title+"\n"+(value||"").trim()).join("\n\n"))});
+$("#generateBtn")?.addEventListener("click",generate);$("#regenerateBtn")?.addEventListener("click",generate);$("#backToContent")?.addEventListener("click",()=>showStep(2));showStep(1);
 window.addEventListener("beforeunload",()=>{state.previewUrls.forEach(url=>URL.revokeObjectURL(url));state.previewUrls=[]});

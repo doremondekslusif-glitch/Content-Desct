@@ -65,9 +65,15 @@ $("#backToPlatform")?.addEventListener("click",()=>showStep(1));
 
 function addFiles(files){
   const valid=files.filter(f=>f&&((f.type||"").startsWith("image/")||(f.type||"").startsWith("video/")));
-  state.files=[...state.files,...valid].slice(0,5);
+  const remaining=Math.max(0,5-state.files.length);
+  const unique=valid.filter(f=>!state.files.some(x=>x.name===f.name&&x.size===f.size&&x.lastModified===f.lastModified));
+  const accepted=unique.slice(0,remaining);
+  state.files=[...state.files,...accepted];
   renderPreviews();
-  if(valid.length)showToast(valid.length+" media ditambahkan ✓");
+  if(accepted.length)showToast(accepted.length+" media ditambahkan ✓");
+  if(unique.length>accepted.length)showToast("Maksimal 5 media dan file duplikat diabaikan.");
+  if(valid.length<files.length)showToast("Hanya foto dan video yang dapat digunakan.");
+  if($("#mediaInput"))$("#mediaInput").value="";
 }
 function renderPreviews(){
   const list=$("#previewList");if(!list)return;
@@ -208,7 +214,7 @@ function renderAiResult(result){
   if(result.visual_summary)insightParts.push("Ringkasan: "+result.visual_summary);
   if(result.audience_fit)insightParts.push("Audiens: "+result.audience_fit);
   if(result.platform_strategy)insightParts.push("Strategi: "+result.platform_strategy);
-  $("#mediaInsight").textContent=insightParts.join("\\n\\n")||"AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
+  $("#mediaInsight").textContent=insightParts.join("\n\n")||"AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
   const analysisParts=[];
   if(result.media_analysis)analysisParts.push("<section><h4>Analisis utama</h4><p>"+escapeHtml(result.media_analysis)+"</p></section>");
   if(strengths.length)analysisParts.push("<section><h4>Kekuatan visual</h4><ul>"+strengths.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");

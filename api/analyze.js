@@ -30,7 +30,7 @@ export default async function handler(req,res){
     if(typeof body==="string"){
       try{body=JSON.parse(body)}catch{body={}}
     }
-    const {platform="Instagram",goal="Jangkauan",context="",media=[]}=body;
+    const {platform="Instagram",goal="Jangkauan",context="",audience="Umum",tone="Natural & santai",media=[]}=body;
 
     if(!Array.isArray(media)||!media.length){
       return res.status(400).json({error:"Tidak ada media untuk dianalisis."});
@@ -45,9 +45,9 @@ export default async function handler(req,res){
         "Kamu adalah AI Content Analyst untuk aplikasi Content Desct. Analisis SEMUA visual yang diberikan. "+
         "Untuk frame video, gabungkan informasi antar-frame dan jangan menganggap setiap frame sebagai konten terpisah. "+
         "Jangan mengarang fakta produk, harga, lokasi, nama orang, atau klaim yang tidak terlihat/ditulis pengguna. "+
-        "Buat hasil dalam Bahasa Indonesia. Platform: "+platform+". Tujuan: "+goal+". Konteks pengguna: "+(context||"(tidak ada)")+". "+
+        "Buat hasil dalam Bahasa Indonesia. Platform: "+platform+". Tujuan: "+goal+". Fokus: "+(context||"(tidak ada)")+". Target audiens: "+audience+". Gaya bahasa: "+tone+". "+
         "Kembalikan HANYA JSON valid dengan struktur: "+
-        '{"score":0-10,"score_reason":"string","media_analysis":"string","hook":"string","caption":"string","hashtags":"string","cta":"string","visual_text":"string","tips":["string","string","string"]}. '+
+        '{"score":0-10,"score_reason":"string","media_analysis":"string","hook":"string","hook_options":["string","string","string"],"caption":"string","hashtags":"string","cta":"string","visual_text":"string","content_ideas":["string","string","string","string","string"],"tips":["string","string","string"]}. '+
         "Nilai score berdasarkan kecocokan visual dengan tujuan, kejelasan pesan, dan kesiapan konten; bukan prediksi viral."
     }];
 

@@ -1,4 +1,4 @@
-const state={platform:"Instagram",goal:"Jangkauan",focus:"Hook audiens",files:[]};
+const state={platform:"Instagram",goal:"Jangkauan",focus:"Hook audiens",audience:"Umum",tone:"Natural & santai",files:[]};
 const platformNotes={Instagram:"Sesuaikan rekomendasi dengan karakter Instagram.",TikTok:"Fokus pada hook cepat, retention, dan discovery.",Facebook:"Cocokkan dengan percakapan dan engagement komunitas.",YouTube:"Perkuat judul, hook, dan alasan untuk menonton.",Threads:"Utamakan percakapan dan gaya yang natural.",X:"Buat pembuka singkat yang memancing respons."};
 const data={
 Instagram:{hook:"Ternyata hal kecil ini bisa bikin rutinitas sehari-hari jadi jauh lebih praktis 👀",caption:"Hal kecil yang ternyata kepakai setiap hari ✨\n\nKalau kamu suka sesuatu yang simpel, praktis, dan tetap enak dilihat, ini bisa jadi salah satu yang wajib masuk daily essentials kamu.\n\nMenurut kamu, bagian paling menarik dari konten ini apa?",hashtags:"#InstagramIndonesia #ContentCreator #LifestyleIndonesia #DailyEssentials #Rekomendasi #ExploreIndonesia",cta:"Kalau kamu suka konten seperti ini, simpan dulu dan kasih tahu pendapatmu di komentar.",tips:["Buat 1–2 detik pertama langsung menampilkan objek atau hasil utama.","Tambahkan teks pendek di video agar pesan tetap terbaca tanpa suara.","Akhiri dengan pertanyaan sederhana untuk mendorong komentar."]},
@@ -9,7 +9,7 @@ Threads:{hook:"Ada nggak sih barang kecil yang akhirnya jadi barang wajib?",capt
 X:{hook:"Barang sederhana, tapi ternyata kepakai setiap hari.",caption:"Suka menemukan barang yang awalnya terlihat biasa, tapi setelah dipakai malah jadi daily essential?\n\nIni salah satunya.",hashtags:"#Lifestyle #Rekomendasi #DailyEssentials",cta:"Setuju atau tidak?",tips:["Buat kalimat pertama sepadat mungkin.","Sisakan ruang untuk orang membalas atau quote-post.","Gunakan media sebagai pelengkap pesan, bukan pengganti konteks."]}};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 $$(".platform").forEach(btn=>btn.addEventListener("click",()=>{state.platform=btn.dataset.platform;$$(".platform").forEach(x=>x.classList.toggle("selected",x===btn));$("#platformNote").textContent=platformNotes[state.platform]}));
-$$(".focus").forEach(btn=>btn.addEventListener("click",()=>{state.focus=btn.dataset.focus;$$(".focus").forEach(x=>x.classList.toggle("selected",x===btn))}));
+$(".focus").forEach(btn=>btn.addEventListener("click",()=>{state.focus=btn.dataset.focus;$(".focus").forEach(x=>x.classList.toggle("selected",x===btn))}));$(".option").forEach(btn=>btn.addEventListener("click",()=>{const type=btn.dataset.audience!==undefined?"audience":"tone";state[type]=btn.dataset[type];$(".option").filter(x=>x.dataset[type]!==undefined).forEach(x=>x.classList.toggle("selected",x===btn))}));
 function showStep(step){$$(".step").forEach(x=>x.classList.toggle("active",x.dataset.step===String(step)));$("#platformPanel").hidden=step!==1;$("#contentPanel").hidden=step!==2;$("#results").hidden=step!==3;if(step===2)$("#contentPanel").scrollIntoView({behavior:"smooth",block:"start"});if(step===3)$("#results").scrollIntoView({behavior:"smooth",block:"start"})}
 $("#nextToContent").addEventListener("click",()=>showStep(2));
 $("#backToPlatform").addEventListener("click",()=>showStep(1));
@@ -101,7 +101,7 @@ function setGenerating(isGenerating){
 
 function renderAiResult(result){
   const d=data[state.platform],ctx=state.focus,m=getMediaProfile();
-  $("#mediaSummary").textContent=m.label;
+  const hooks=result.hook_options||[result.hook||d.hook,"POV: ini mungkin yang sedang kamu cari.","Sederhana, tapi ternyata berguna setiap hari."];$("#hookOptions").textContent=hooks.map((x,i)=>(i+1)+". "+x).join("\n");const ideas=result.content_ideas||["Buat postingan yang menonjolkan manfaat utama.","Tunjukkan cara penggunaan dalam kehidupan sehari-hari.","Buat perbandingan sebelum dan sesudah menggunakan produk.","Jawab pertanyaan yang paling sering ditanyakan audiens.","Buat versi video pendek dari konten ini."];$("#contentIdeas").innerHTML=ideas.map(x=>"<li>"+x+"</li>").join("");$("#mediaSummary").textContent=m.label;
   $("#mediaInsight").textContent="AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
   $("#mediaAnalysis").textContent=result.media_analysis||m.analysis;
   $("#visualText").textContent=result.visual_text||m.visual;
@@ -137,7 +137,7 @@ async function generate(){
   setGenerating(true);
   try{
     const media=await buildMediaPayload();
-    const requestBody=JSON.stringify({platform:state.platform,goal:state.goal,context:ctx,media});
+    const requestBody=JSON.stringify({platform:state.platform,goal:state.goal,context:ctx,audience:state.audience,tone:state.tone,media});
     if(new Blob([requestBody]).size>4*1024*1024)throw new Error("Media terlalu besar untuk dikirim ke backend. Kurangi jumlah foto/video atau gunakan file yang lebih kecil.");
     const response=await fetch(ANALYZER_API_URL,{
       method:"POST",

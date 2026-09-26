@@ -1,7 +1,146 @@
 const ALLOWED_ORIGIN=process.env.ALLOWED_ORIGIN||"*";
 const DEFAULT_MODELS=[process.env.GEMINI_MODEL||"gemini-3.8-flash","gemini-3.5-flash-lite","gemini-3.8-flash"].filter(function(x,i,a){return x&&a.indexOf(x)===i});
-function cors(res){res.setHeader("Access-Control-Allow-Origin",ALLOWED_ORIGIN);res.setHeader("Access-Control-Allow-Methods","POST,OPTIONS");res.setHeader("Access-Control-Allow-Headers","Content-Type")}
-function cleanJson(text){var raw=String(text||"").trim();var fenced=raw.replace(/^\s*```(?:json)?\s*/i,"").replace(/\s*```\s*$/,"").trim();var match=fenced.match(/\{[\s\S]*\}/);if(!match)throw new Error("AI tidak mengembalikan JSON yang valid.");return JSON.parse(match[0])}
-function buildParts(o){var parts=[{text:"Kamu adalah AI Content Analyst untuk aplikasi Content Desct. Analisis SEMUA visual yang diberikan. Untuk frame video, gabungkan informasi antar-frame. Jangan mengarang fakta produk, harga, lokasi, nama orang, atau klaim yang tidak terlihat. Gunakan Bahasa Indonesia. Platform: "+o.platform+". Tujuan: "+o.goal+". Fokus: "+(o.context||"(tidak ada)")+". Target audiens: "+o.audience+". Gaya bahasa: "+o.tone+". Kembalikan HANYA JSON valid dengan struktur: {\"score\":0-10,\"score_reason\":\"string\",\"media_analysis\":\"string\",\"hook\":\"string\",\"hook_options\":[\"string\",\"string\",\"string\"],\"caption\":\"string\",\"hashtags\":\"string\",\"cta\":\"string\",\"visual_text\":\"string\",\"content_ideas\":[\"string\",\"string\",\"string\",\"string\",\"string\"],\"tips\":[\"string\",\"string\",\"string\"]}."}];for(var i=0;i<o.media.length;i++){var item=o.media[i];if(!item||typeof item.data!=="string")continue;var m=item.data.match(/^data:(image\/[^;]+);base64,(.+)$/s);if(m)parts.push({inline_data:{mime_type:m[1],data:m[2]}})}return parts}
-async function callGemini(model,parts){var response=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model)+":generateContent?key="+encodeURIComponent(process.env.GEMINI_API_KEY),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{role:"user",parts:parts}],generationConfig:{responseMimeType:"application/json",maxOutputTokens:1800,temperature:0.4}})});var data=await response.json().catch(function(){return{}});if(!response.ok)throw new Error((data&&data.error&&data.error.message||"Gemini API error.")+" [model: "+model+"]");var outputText=data&&data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts?data.candidates[0].content.parts.filter(function(p){return typeof p.text==="string"}).map(function(p){return p.text}).join(""):"";if(!outputText)throw new Error("Gemini tidak mengembalikan hasil analisis. [model: "+model+"]");return cleanJson(outputText)}
-export default async function handler(req,res){cors(res);if(req.method==="OPTIONS")return res.status(204).end();if(req.method!=="POST")return res.status(405).json({error:"Method tidak diizinkan."});if(!process.env.GEMINI_API_KEY)return res.status(500).json({error:"GEMINI_API_KEY belum dipasang di environment backend."});try{var body=req.body||{};if(typeof body==="string"){try{body=JSON.parse(body)}catch(e){body={}}}var platform=body.platform||"Instagram",goal=body.goal||"Jangkauan",context=body.context||"",audience=body.audience||"Umum",tone=body.tone||"Natural & santai",media=body.media||[];if(!Array.isArray(media)||!media.length)return res.status(400).json({error:"Tidak ada media untuk dianalisis."});if(media.length>20)return res.status(400).json({error:"Jumlah frame/media terlalu banyak."});var parts=buildParts({platform:platform,goal:goal,context:context,audience:audience,tone:tone,media:media});if(parts.length===1)return res.status(400).json({error:"Media gambar/frame tidak valid."});var lastError=null;for(var j=0;j<DEFAULT_MODELS.length;j++){try{return res.status(200).json(await callGemini(DEFAULT_MODELS[j],parts))}catch(error){lastError=error;console.error("Gemini model failed:",DEFAULT_MODELS[j],error.message)}}return res.status(503).json({error:lastError?lastError.message:"Semua model AI tidak tersedia saat ini."})}catch(error){console.error(error);return res.status(500).json({error:error.message||"Analisis AI gagal."})}}
+
+const RESPONSE_SCHEMA={
+  type:"object",
+  properties:{
+    score:{type:"number"},
+    score_reason:{type:"string"},
+    score_breakdown:{
+      type:"object",
+      properties:{
+        visual:{type:"number"},
+        message:{type:"number"},
+        platform:{type:"number"},
+        audience:{type:"number"}
+      },
+      required:["visual","message","platform","audience"]
+    },
+    media_analysis:{type:"string"},
+    visual_summary:{type:"string"},
+    visual_strengths:{type:"array",items:{type:"string"}},
+    visual_weaknesses:{type:"array",items:{type:"string"}},
+    audience_fit:{type:"string"},
+    platform_strategy:{type:"string"},
+    hook:{type:"string"},
+    hook_options:{type:"array",items:{type:"string"}},
+    caption:{type:"string"},
+    hashtags:{type:"string"},
+    cta:{type:"string"},
+    visual_text:{type:"string"},
+    content_ideas:{type:"array",items:{type:"string"}},
+    tips:{type:"array",items:{type:"string"}}
+  },
+  required:["score","score_reason","score_breakdown","media_analysis","visual_summary","visual_strengths","visual_weaknesses","audience_fit","platform_strategy","hook","hook_options","caption","hashtags","cta","visual_text","content_ideas","tips"]
+};
+
+function cors(res){
+  res.setHeader("Access-Control-Allow-Origin",ALLOWED_ORIGIN);
+  res.setHeader("Access-Control-Allow-Methods","POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers","Content-Type");
+}
+
+function cleanJson(text){
+  var raw=String(text||"").trim();
+  var fenced=raw.replace(/^\s*\`\`\`(?:json)?\s*/i,"").replace(/\s*\`\`\`\s*$/,"").trim();
+  var match=fenced.match(/\{[\s\S]*\}/);
+  if(!match)throw new Error("AI tidak mengembalikan JSON yang valid.");
+  return JSON.parse(match[0]);
+}
+
+function buildPrompt(o){
+  return "Kamu adalah Content Desct AI Analyst. Pahami media terlebih dahulu, baru buat strategi konten. Jangan sekadar mengisi template.\n\n"+
+    "PROSES ANALISIS:\n"+
+    "1. Amati semua foto/frame video dan catat objek, orang, teks, suasana, komposisi, aksi, dan konteks yang benar-benar terlihat.\n"+
+    "2. Bedakan fakta visual dari dugaan. Jangan mengarang harga, merek, spesifikasi, lokasi, identitas, manfaat, atau klaim produk.\n"+
+    "3. Tentukan pesan utama yang paling didukung oleh media.\n"+
+    "4. Temukan kekuatan dan kelemahan visual terhadap tujuan konten.\n"+
+    "5. Sesuaikan strategi dengan platform, tujuan, fokus, audiens, dan gaya bahasa.\n"+
+    "6. Buat copy yang spesifik terhadap media, bukan kalimat generik yang bisa dipakai untuk gambar apa pun.\n"+
+    "7. Lakukan pemeriksaan akhir agar semua output konsisten dengan bukti visual dan pilihan pengguna.\n\n"+
+    "KONTEKS:\n"+
+    "Platform: "+o.platform+"\n"+
+    "Tujuan: "+o.goal+"\n"+
+    "Fokus: "+(o.context||"(tidak ada)")+"\n"+
+    "Target audiens: "+o.audience+"\n"+
+    "Gaya bahasa: "+o.tone+"\n\n"+
+    "ATURAN KUALITAS:\n"+
+    "- Gunakan Bahasa Indonesia natural dan konkret.\n"+
+    "- Jangan menjanjikan viral, trending, pasti laku, atau performa tertentu.\n"+
+    "- Buat 3 hook dengan pendekatan berbeda: curiosity, benefit, dan relatable/story.\n"+
+    "- Caption harus sesuai platform dan tujuan, bukan sekadar mengulang hook.\n"+
+    "- Hashtag hanya yang relevan dengan isi media dan konteks.\n"+
+    "- CTA harus sesuai tujuan; jangan selalu mengarah ke pembelian.\n"+
+    "- Ide konten berikutnya harus berasal dari media yang dianalisis.\n"+
+    "- Skor adalah kesiapan dan kecocokan konten, bukan prediksi viral.\n\n"+
+    "Kembalikan HANYA JSON sesuai schema.";
+}
+
+function buildParts(o){
+  var parts=[{text:buildPrompt(o)}];
+  for(var i=0;i<o.media.length;i++){
+    var item=o.media[i];
+    if(!item||typeof item.data!=="string")continue;
+    var m=item.data.match(/^data:(image\/[^;]+);base64,(.+)$/s);
+    if(m){
+      parts.push({text:"Media "+(i+1)+": "+(item.name||item.type||"visual")});
+      parts.push({inline_data:{mime_type:m[1],data:m[2]}});
+    }
+  }
+  return parts;
+}
+
+async function callGemini(model,parts){
+  var response=await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model)+":generateContent?key="+encodeURIComponent(process.env.GEMINI_API_KEY),
+    {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        contents:[{role:"user",parts:parts}],
+        generationConfig:{
+          responseMimeType:"application/json",
+          responseSchema:RESPONSE_SCHEMA,
+          thinkingConfig:{thinkingLevel:"medium"},
+          maxOutputTokens:5000
+        }
+      })
+    }
+  );
+  var data=await response.json().catch(function(){return{}});
+  if(!response.ok)throw new Error(((data&&data.error&&data.error.message)||"Gemini API error.")+" [model: "+model+"]");
+  var outputText=data&&data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts?
+    data.candidates[0].content.parts.filter(function(p){return typeof p.text==="string"}).map(function(p){return p.text}).join(""):"";
+  if(!outputText)throw new Error("Gemini tidak mengembalikan hasil analisis. [model: "+model+"]");
+  return cleanJson(outputText);
+}
+
+export default async function handler(req,res){
+  cors(res);
+  if(req.method==="OPTIONS")return res.status(204).end();
+  if(req.method!=="POST")return res.status(405).json({error:"Method tidak diizinkan."});
+  if(!process.env.GEMINI_API_KEY)return res.status(500).json({error:"GEMINI_API_KEY belum dipasang di environment backend."});
+  try{
+    var body=req.body||{};
+    if(typeof body==="string"){try{body=JSON.parse(body)}catch(e){body={}}}
+    var platform=body.platform||"Instagram";
+    var goal=body.goal||"Jangkauan";
+    var context=body.context||"";
+    var audience=body.audience||"Umum";
+    var tone=body.tone||"Natural & santai";
+    var media=body.media||[];
+    if(!Array.isArray(media)||!media.length)return res.status(400).json({error:"Tidak ada media untuk dianalisis."});
+    if(media.length>20)return res.status(400).json({error:"Jumlah frame/media terlalu banyak."});
+    var parts=buildParts({platform:platform,goal:goal,context:context,audience:audience,tone:tone,media:media});
+    if(parts.length===1)return res.status(400).json({error:"Media gambar/frame tidak valid."});
+    var lastError=null;
+    for(var j=0;j<DEFAULT_MODELS.length;j++){
+      try{return res.status(200).json(await callGemini(DEFAULT_MODELS[j],parts))}
+      catch(error){lastError=error;console.error("Gemini model failed:",DEFAULT_MODELS[j],error.message)}
+    }
+    return res.status(503).json({error:lastError?lastError.message:"Semua model AI tidak tersedia saat ini."});
+  }catch(error){
+    console.error(error);
+    return res.status(500).json({error:error.message||"Analisis AI gagal."});
+  }
+}

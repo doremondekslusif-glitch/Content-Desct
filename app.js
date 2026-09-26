@@ -241,9 +241,23 @@ async function generate(){
     if(!response.ok)throw new Error(result.error||"Server AI mengembalikan error.");
     renderAiResult(result);
   }catch(error){
-    console.error(error);showToast(error.message||"Analisis AI gagal.");
-    $("#mediaInsight").textContent="Analisis AI gagal: "+(error.message||"periksa koneksi backend.");
-    showStep(3);
+    console.error(error);
+    const fallback={
+      score:7.8,
+      score_reason:"AI backend sedang tidak tersedia, jadi hasil sementara dibuat dari pilihan konten dan media yang kamu unggah.",
+      media_analysis:m.analysis,
+      hook:d.hook,
+      hook_options:[d.hook,"POV: kamu baru sadar ini ternyata berguna setiap hari.","Sederhana, praktis, dan layak dicoba."],
+      caption:d.caption,
+      hashtags:d.hashtags,
+      cta:d.cta,
+      visual_text:m.visual,
+      content_ideas:["Tunjukkan manfaat utama dari konten ini.","Buat versi before-after.","Tampilkan cara penggunaan sehari-hari.","Jawab pertanyaan yang sering muncul dari audiens.","Buat versi video pendek dengan hook yang lebih cepat."],
+      tips:d.tips
+    };
+    renderAiResult(fallback);
+    $("#mediaInsight").textContent="AI belum dapat dihubungi ("+(error.message||"server 503")+"). Hasil sementara tetap ditampilkan agar kontenmu tidak hilang.";
+    showToast("AI gagal, hasil sementara ditampilkan.");
   }finally{setGenerating(false)}
 }
 

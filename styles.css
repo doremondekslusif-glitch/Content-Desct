@@ -13,3 +13,27 @@
 .analysis-content ul{margin:0;padding-left:21px}
 .analysis-content li{margin:0 0 6px}
 .analysis-content li:last-child{margin-bottom:0}
+
+/* Finishing polish */
+button:focus-visible,.upload-zone:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.6;cursor:wait;transform:none!important}
+.upload-zone.dragging{border-color:#9b7cff;background:#171427;box-shadow:0 0 0 3px #9b7cff18}
+.preview-list:empty{display:none}
+.preview{box-shadow:0 6px 18px #0003}
+.preview .remove:hover{background:#9b7cff;color:#0b0910}
+.secondary-btn:hover,.copy-btn:hover{border-color:#7860dc;background:#171427}
+.result-card,.score-card,.media-analysis{transition:border-color .2s,transform .2s}
+.result-card:hover{border-color:#343a49}
+.results{scroll-margin-top:90px}
+.media-analysis{align-items:flex-start}
+.media-analysis p{white-space:pre-line}
+@media(max-width:680px){
+  .hero p{font-size:15px}
+  .panel h2,.results h2{font-size:19px}
+  .score-card strong{font-size:30px}
+  .result-card{padding:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*:before,*:after{transition:none!important;animation:none!important}
+}

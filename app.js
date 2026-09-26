@@ -37,7 +37,7 @@ function showStep(step){
   Object.entries(panels).forEach(([n,sel])=>{const el=$(sel);if(el)el.hidden=Number(n)!==step});
   const target=$(panels[step]);if(target&&step>1)target.scrollIntoView({behavior:"smooth",block:"start"});
 }
-function bindChoices(selector,key,datasetKey){$(selector).forEach(btn=>btn.addEventListener("click",()=>{const value=btn.dataset[datasetKey];if(value==null)return;state[key]=value;$(selector).forEach(x=>x.classList.toggle("selected",x===btn));saveSession()}))}
+function bindChoices(selector,key,datasetKey){$$(selector).forEach(btn=>btn.addEventListener("click",()=>{const value=btn.dataset[datasetKey];if(value==null)return;state[key]=value;$$(selector).forEach(x=>x.classList.toggle("selected",x===btn));saveSession()}))}
 bindChoices(".platform","platform","platform");bindChoices(".focus","focus","focus");bindChoices(".goal","goal","goal");
 $$(".option").forEach(btn=>btn.addEventListener("click",()=>{const key=btn.dataset.audience!==undefined?"audience":"tone";const value=btn.dataset[key];if(value==null)return;state[key]=value;$$(".option").filter(x=>x.dataset[key]!==undefined).forEach(x=>x.classList.toggle("selected",x===btn));saveSession()}));
 $$(".platform").forEach(btn=>btn.addEventListener("click",()=>{const note=$("#platformNote");if(note)note.textContent=platformNotes[state.platform]||""}));

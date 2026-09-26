@@ -4,3 +4,12 @@
 
 .hook-option{width:100%;display:flex;align-items:flex-start;gap:10px;text-align:left;padding:12px 13px;margin:0 0 8px;border:1px solid #292e39;border-radius:11px;background:#0d1016;color:#dfe2e8;cursor:pointer;font:inherit;line-height:1.55;transition:.2s}.hook-option:hover{border-color:#7860dc;background:#151326;transform:translateY(-1px)}.hook-option.selected{border-color:#9b7cff;background:#19152b;box-shadow:0 0 0 1px #9b7cff33}.hook-number{flex:0 0 auto;font-weight:800;color:#a993ff;min-width:22px}.hook-copy{flex:1}.copy-all-btn{border-color:#7860dc}.copy-all-btn:hover{background:#171427}.result-card #caption,.result-card #hook,.result-card #hashtags,.result-card #visualText,.result-card #cta,.result-card #mediaAnalysis{white-space:pre-line}.text-gap{height:10px}@media(max-width:680px){.copy-all-btn{width:100%}}
 .media-analysis p{white-space:pre-line}
+
+
+.analysis-content{display:flex;flex-direction:column;gap:18px;line-height:1.7;color:#dfe2e8}
+.analysis-content section{margin:0;padding:0}
+.analysis-content h4{margin:0 0 7px;font-size:14px;font-weight:800;color:#fff}
+.analysis-content p{margin:0}
+.analysis-content ul{margin:0;padding-left:21px}
+.analysis-content li{margin:0 0 6px}
+.analysis-content li:last-child{margin-bottom:0}

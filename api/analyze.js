@@ -18,19 +18,7 @@ const RESPONSE_SCHEMA={
     },
     media_analysis:{type:"string"},
     visual_summary:{type:"string"},
-    visual_details:{
-      type:"object",
-      properties:{
-        subjects:{type:"string"},
-        setting:{type:"string"},
-        composition:{type:"string"},
-        colors:{type:"string"},
-        visible_text:{type:"string"},
-        action_or_use:{type:"string"},
-        mood:{type:"string"}
-      },
-      required:["subjects","setting","composition","colors","visible_text","action_or_use","mood"]
-    },
+    visual_details:{type:"string"},
     visual_strengths:{type:"array",items:{type:"string"}},
     visual_weaknesses:{type:"array",items:{type:"string"}},
     audience_fit:{type:"string"},

@@ -218,25 +218,28 @@ function renderAiResult(result){
   const hasImage=state.files.some(f=>f.type.startsWith("image/"));
   const mode=hasVideo&&hasImage?"CAMPURAN":hasVideo?"VIDEO":"FOTO";
   const hooks=Array.isArray(result.hook_options)&&result.hook_options.length?result.hook_options:[result.hook||d.hook,"POV: ini mungkin yang sedang kamu cari.","Sederhana, tapi ternyata berguna setiap hari."];
-  const hookBox=$("#hookOptions");hookBox.innerHTML="";
-  hooks.slice(0,5).forEach((hook,i)=>{
-    const row=document.createElement("button");row.type="button";row.className="hook-option"+(hook===state.selectedHook?" selected":"");
-    const n=document.createElement("span");n.className="hook-number";n.textContent=(i+1)+".";
-    const t=document.createElement("span");t.className="hook-copy";t.textContent=hook;
-    row.append(n,t);
-    row.addEventListener("click",()=>{state.selectedHook=hook;$$(".hook-option").forEach(x=>x.classList.toggle("selected",x===row));$("#hook").textContent=hook;showToast("Hook dipilih ✓")});
-    hookBox.appendChild(row);
-  });
+  const hookBox=$("#hookOptions");
+  if(hookBox){
+    hookBox.innerHTML="";
+    hooks.slice(0,5).forEach((hook,i)=>{
+      const row=document.createElement("button");row.type="button";row.className="hook-option"+(hook===state.selectedHook?" selected":"");
+      const n=document.createElement("span");n.className="hook-number";n.textContent=(i+1)+".";
+      const t=document.createElement("span");t.className="hook-copy";t.textContent=hook;
+      row.append(n,t);
+      row.addEventListener("click",()=>{state.selectedHook=hook;$$(".hook-option").forEach(x=>x.classList.toggle("selected",x===row));$("#hook").textContent=hook;showToast("Hook dipilih ✓")});
+      hookBox.appendChild(row);
+    });
+  }
   const ideas=Array.isArray(result.content_ideas)&&result.content_ideas.length?result.content_ideas:["Buat postingan yang menonjolkan manfaat utama.","Tunjukkan cara penggunaan dalam kehidupan sehari-hari.","Buat perbandingan sebelum dan sesudah menggunakan produk.","Jawab pertanyaan yang paling sering ditanyakan audiens.","Buat versi video pendek dari konten ini."];
-  $("#contentIdeas").innerHTML=ideas.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
-  $("#mediaSummary").textContent=m.label;
+  const ideasBox=$("#contentIdeas");if(ideasBox)ideasBox.innerHTML=ideas.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
+  const summary=$("#mediaSummary");if(summary)summary.textContent=m.label;
   const strengths=Array.isArray(result.visual_strengths)?result.visual_strengths:[];
   const weaknesses=Array.isArray(result.visual_weaknesses)?result.visual_weaknesses:[];
   const insightParts=[];
   if(result.visual_summary)insightParts.push("Ringkasan: "+result.visual_summary);
   if(result.audience_fit)insightParts.push("Audiens: "+result.audience_fit);
   if(result.platform_strategy)insightParts.push("Strategi: "+result.platform_strategy);
-  $("#mediaInsight").textContent=insightParts.join("\n\n")||"AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
+  const insight=$("#mediaInsight");if(insight)insight.textContent=insightParts.join("\n\n")||"AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
   const visualDetails=String(result.visual_details||"").trim();
   const detailBox=$("#visualDetails");
   if(detailBox)detailBox.innerHTML=visualDetails?"<div class=\"visual-detail\"><span>"+escapeHtml(visualDetails)+"</span></div>":"<p>Detail visual belum tersedia.</p>";
@@ -244,26 +247,23 @@ function renderAiResult(result){
   if(result.media_analysis)analysisParts.push("<section><h4>Analisis utama</h4><p>"+escapeHtml(result.media_analysis)+"</p></section>");
   if(strengths.length)analysisParts.push("<section><h4>Kekuatan visual</h4><ul>"+strengths.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
   if(weaknesses.length)analysisParts.push("<section><h4>Yang bisa diperbaiki</h4><ul>"+weaknesses.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>");
-  $("#mediaAnalysis").innerHTML=analysisParts.join("")||"<p>"+escapeHtml(m.analysis)+"</p>";
-  $("#visualText").textContent=result.visual_text||m.visual;
-  $("#hook").textContent=result.hook||d.hook;
-  const hookCard=$("#hookCardTitle");
-  const hookHelp=$("#hookHelp");
+  const analysis=$("#mediaAnalysis");if(analysis)analysis.innerHTML=analysisParts.join("")||"<p>"+escapeHtml(m.analysis)+"</p>";
+  const visualText=$("#visualText");if(visualText)visualText.textContent=result.visual_text||m.visual;
+  const hook=$("#hook");if(hook)hook.textContent=result.hook||d.hook;
+  const hookCard=$("#hookCardTitle"),hookHelp=$("#hookHelp");
   if(hookCard)hookCard.textContent=mode==="VIDEO"?"🎬 Hook Video":mode==="CAMPURAN"?"🎬 Hook Utama":"🔥 Hook Caption";
   if(hookHelp)hookHelp.textContent=result.hook_usage||(mode==="VIDEO"?"Gunakan di voice-over atau teks pada 1–3 detik pertama video.":"Gunakan sebagai kalimat pertama caption.");
-  const captionCard=$("#captionCardTitle");
-  if(captionCard)captionCard.textContent=mode==="VIDEO"?"✍️ Caption singkat":"✍️ Caption";
-  $("#caption").innerHTML=formatText(result.caption||d.caption);
-  $("#hashtags").textContent=result.hashtags||d.hashtags;
-  $("#cta").textContent=result.cta||d.cta;
+  const captionCard=$("#captionCardTitle");if(captionCard)captionCard.textContent=mode==="VIDEO"?"✍️ Caption singkat":"✍️ Caption";
+  const caption=$("#caption");if(caption)caption.innerHTML=formatText(result.caption||d.caption);
+  const hashtags=$("#hashtags");if(hashtags)hashtags.textContent=result.hashtags||d.hashtags;
+  const cta=$("#cta");if(cta)cta.textContent=result.cta||d.cta;
   const tips=Array.isArray(result.tips)&&result.tips.length?result.tips:d.tips;
-  $("#tips").innerHTML=tips.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
+  const tipsBox=$("#tips");if(tipsBox)tipsBox.innerHTML=tips.map(x=>"<li>"+escapeHtml(x)+"</li>").join("");
   const score=Number(result.score),safeScore=Number.isFinite(score)?Math.max(0,Math.min(10,score)):8.9;
-  $("#score").textContent=safeScore.toFixed(1);$("#scoreBar").style.width=(safeScore*10)+"%";
+  const scoreEl=$("#score"),bar=$("#scoreBar");if(scoreEl)scoreEl.textContent=safeScore.toFixed(1);if(bar)bar.style.width=(safeScore*10)+"%";
   const breakdown=result.score_breakdown||{};
-  const breakdownText=[["Visual",breakdown.visual],["Pesan",breakdown.message],["Platform",breakdown.platform],["Audiens",breakdown.audience]]
-    .filter(x=>Number.isFinite(Number(x[1]))).map(x=>x[0]+" "+Number(x[1]).toFixed(1)).join(" · ");
-  $("#scoreText").textContent=(result.score_reason||goalText[state.goal])+(breakdownText?" | "+breakdownText:"");
+  const breakdownText=[["Visual",breakdown.visual],["Pesan",breakdown.message],["Platform",breakdown.platform],["Audiens",breakdown.audience]].filter(x=>Number.isFinite(Number(x[1]))).map(x=>x[0]+" "+Number(x[1]).toFixed(1)).join(" · ");
+  const scoreText=$("#scoreText");if(scoreText)scoreText.textContent=(result.score_reason||goalText[state.goal])+(breakdownText?" | "+breakdownText:"");
   showStep(3);
 }
 

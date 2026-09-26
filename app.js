@@ -100,14 +100,14 @@ function setGenerating(isGenerating){
   btn.innerHTML=isGenerating?"<span>◌</span> AI sedang menganalisis media...":"<span>✦</span> Analisis & Generate";
 }
 
-function renderAiResult(result){
+function formatText(text){return String(text||"").replace(/\r\n/g,"\n").replace(/\n{3,}/g,"\n\n").split("\n").map(x=>x.trim()?`<div>${escapeHtml(x.trim())}</div>`:"<div class=\"text-gap\"></div>").join("");}\nfunction escapeHtml(text){const el=document.createElement("div");el.textContent=text;return el.innerHTML;}\nfunction renderAiResult(result){
   const d=data[state.platform],ctx=state.focus,m=getMediaProfile();
-  const hooks=result.hook_options||[result.hook||d.hook,"POV: ini mungkin yang sedang kamu cari.","Sederhana, tapi ternyata berguna setiap hari."];$("#hookOptions").textContent=hooks.map((x,i)=>(i+1)+". "+x).join("\n");const ideas=result.content_ideas||["Buat postingan yang menonjolkan manfaat utama.","Tunjukkan cara penggunaan dalam kehidupan sehari-hari.","Buat perbandingan sebelum dan sesudah menggunakan produk.","Jawab pertanyaan yang paling sering ditanyakan audiens.","Buat versi video pendek dari konten ini."];$("#contentIdeas").innerHTML=ideas.map(x=>"<li>"+x+"</li>").join("");$("#mediaSummary").textContent=m.label;
+  const hooks=result.hook_options||[result.hook||d.hook,"POV: ini mungkin yang sedang kamu cari.","Sederhana, tapi ternyata berguna setiap hari."];$("#hookOptions").innerHTML=hooks.map((x,i)=>"<div class=\"hook-option\" data-hook-index=\""+i+"\"><span class=\"hook-number\">"+(i+1)+"</span><span>"+formatText(x)+"</span></div>").join("");const ideas=result.content_ideas||["Buat postingan yang menonjolkan manfaat utama.","Tunjukkan cara penggunaan dalam kehidupan sehari-hari.","Buat perbandingan sebelum dan sesudah menggunakan produk.","Jawab pertanyaan yang paling sering ditanyakan audiens.","Buat versi video pendek dari konten ini."];$("#contentIdeas").innerHTML=ideas.map(x=>"<li>"+x+"</li>").join("");$("#mediaSummary").textContent=m.label;
   $("#mediaInsight").textContent="AI menganalisis isi visual media, lalu menyesuaikan hasil dengan platform dan tujuan konten.";
   $("#mediaAnalysis").textContent=result.media_analysis||m.analysis;
   $("#visualText").textContent=result.visual_text||m.visual;
   $("#hook").textContent=result.hook||d.hook;
-  $("#caption").textContent=ctx&&result.caption?result.caption+"\n\nKonteks tambahan: "+ctx:(result.caption||d.caption);
+  $("#caption").innerHTML=formatText(ctx&&result.caption?result.caption+"\n\nKonteks tambahan: "+ctx:(result.caption||d.caption));
   $("#hashtags").textContent=result.hashtags||d.hashtags;
   $("#cta").textContent=result.cta||d.cta;
   const tips=Array.isArray(result.tips)?result.tips:d.tips;

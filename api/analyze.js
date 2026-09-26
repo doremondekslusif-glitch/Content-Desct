@@ -18,6 +18,19 @@ const RESPONSE_SCHEMA={
     },
     media_analysis:{type:"string"},
     visual_summary:{type:"string"},
+    visual_details:{
+      type:"object",
+      properties:{
+        subjects:{type:"string"},
+        setting:{type:"string"},
+        composition:{type:"string"},
+        colors:{type:"string"},
+        visible_text:{type:"string"},
+        action_or_use:{type:"string"},
+        mood:{type:"string"}
+      },
+      required:["subjects","setting","composition","colors","visible_text","action_or_use","mood"]
+    },
     visual_strengths:{type:"array",items:{type:"string"}},
     visual_weaknesses:{type:"array",items:{type:"string"}},
     audience_fit:{type:"string"},
@@ -66,7 +79,8 @@ function buildPrompt(o){
     "9. Untuk VIDEO: hook utama dipakai pada 1–3 detik pertama sebagai voice-over atau teks layar. Caption harus singkat karena informasi utama disampaikan oleh video.\n"+
     "10. Untuk VIDEO, isi video_hook dan voiceover dengan kalimat natural; boleh sama jika paling sesuai.\n"+
     "11. Untuk CAMPURAN, prioritaskan strategi video bila ada video.\n"+
-    "12. Lakukan pemeriksaan akhir agar semua output konsisten dengan bukti visual dan pilihan pengguna.\n\n"+
+    "12. Untuk visual_details, jelaskan subjek, setting, komposisi, warna, teks yang benar-benar terbaca, aksi/penggunaan yang terlihat, dan mood visual. Jika sesuatu tidak terlihat jelas, tulis bahwa tidak terlihat jelas; jangan menebak.\n"+
+    "13. Lakukan pemeriksaan akhir agar semua output konsisten dengan bukti visual dan pilihan pengguna.\n\n"+
     "KONTEKS:\n"+
     "Platform: "+o.platform+"\n"+
     "Tujuan: "+o.goal+"\n"+
